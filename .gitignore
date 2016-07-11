@@ -1,0 +1,8 @@
+*.log
+*.class
+/target/
+/.settings/
+.classpath
+.project
+/logs/
+cfg.example.json

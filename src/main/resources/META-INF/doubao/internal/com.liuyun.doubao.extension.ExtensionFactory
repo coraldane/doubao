@@ -1,0 +1,2 @@
+adaptive=com.liuyun.doubao.extension.factory.AdaptiveExtensionFactory
+spi=com.liuyun.doubao.extension.factory.SpiExtensionFactory

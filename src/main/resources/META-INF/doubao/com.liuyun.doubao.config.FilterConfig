@@ -1,0 +1,3 @@
+default=com.liuyun.doubao.config.filter.DefaultFilterConfig
+match=com.liuyun.doubao.config.filter.MatchFilterConfig
+regex=com.liuyun.doubao.config.filter.RegexFilterConfig

@@ -1,0 +1,2 @@
+stdout=com.liuyun.doubao.io.std.StdOutput
+redis=com.liuyun.doubao.io.redis.RedisOutput
