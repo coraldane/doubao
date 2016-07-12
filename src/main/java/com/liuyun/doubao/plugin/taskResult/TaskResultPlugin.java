@@ -49,14 +49,14 @@ public class TaskResultPlugin extends DefaultPlugin {
 			if(false == this.dealWithPartResult(loggerIndex, data)){
 				return false;
 			}
-		}
-		
-		String taskMessage = data.getString("task_message");
-		try{
-			TaskInfo taskInfo = JSON.parseObject(taskMessage, TaskInfo.class);
-			data.put("task_info", taskInfo);
-		} catch(Exception e){
-			logger.error("ParseJsonError===>>>" + taskMessage, e);
+		} else {
+			String taskMessage = data.getString("task_message");
+			try{
+				TaskInfo taskInfo = JSON.parseObject(taskMessage, TaskInfo.class);
+				data.put("task_info", taskInfo);
+			} catch(Exception e){
+				logger.error("ParseJsonError===>>>" + taskMessage, e);
+			}
 		}
 		
 		return true;
@@ -73,7 +73,8 @@ public class TaskResultPlugin extends DefaultPlugin {
 			String lastMessage = jedis.hget(this.taskResultBufferKey, field);
 			String wholeMessage = ((null == lastMessage)?"":lastMessage) + taskMessage;
 			try{
-				JSON.parseObject(wholeMessage);
+				TaskInfo taskInfo = JSON.parseObject(wholeMessage, TaskInfo.class);
+				data.put("task_info", taskInfo);
 				data.put("task_message", wholeMessage);
 				bParseOk = true;
 				
