@@ -8,7 +8,7 @@
 
 ## Quick Start
 
-1. 编译安装
+1. 编译安装   
 工程使用Java编写，最低版本JDK 1.6   
 编译打包需要使用Maven, 请先安装(http://maven.apache.org/)   
 
@@ -18,21 +18,21 @@ cd doubao
 sh package_war.sh  
 ```
 执行后会在target子目录下生成文件doubao-1.0.0-jar-with-dependencies.jar   
-这个文件是可执行的JAR文件，里面包含了所有以来的JAR包(共4.5MB)  
-启动服务方式如下：   
+这个文件是可执行的JAR文件，里面包含了所有依赖的jar(共4.5MB)  
+启动服务：   
 ```
 java -jar doubao-1.0.0-jar-with-dependencies.jar cfg.json
 ```
-也可以将jar文件和工程中的control文件复制到同一目录，使用如下方式后台启动   
+也可以将jar文件和工程中的control文件复制到同一目录，以后台模式启动   
 ```
 cd $workdir
 ./control start
 ```
-停止服务使用   
+停止服务   
 ```
 ./control stop
 ```
-或者 kill 进程号(注意这里不建议使用kill -9强制退出)，服务就会安全退出。   
+或者 kill 进程号(不建议使用kill -9强制退出)，服务就会安全退出。   
 
 
 默认需要读取当前目录下的配置文件cfg.json   
