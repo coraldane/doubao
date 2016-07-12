@@ -76,6 +76,8 @@ public class TaskResultPlugin extends DefaultPlugin {
 				JSON.parseObject(wholeMessage);
 				data.put("task_message", wholeMessage);
 				bParseOk = true;
+				
+				jedis.hdel(this.taskResultBufferKey, field);
 			} catch(Exception e){
 				
 			}
