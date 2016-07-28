@@ -1,7 +1,5 @@
 package com.liuyun.doubao.plugin.resourceInfo;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,10 +30,33 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 		if(null == taskInfo){
 			return false;
 		}
+		
 		JSONObject paramsObj = taskInfo.getJSONObject("params");
 		if(null == paramsObj){
 			return false;
 		}
+		
+		//remove metaUuids when method is record_red_url
+		if("record_red_url".equals(taskInfo.getString("method"))){
+			JSONArray redUrls = paramsObj.getJSONArray("redUrls");
+			if(null == redUrls){
+				return false;
+			}
+			for(int index=0; index < redUrls.size(); index++){
+				JSONObject urlObj = redUrls.getJSONObject(index);
+				if(null == urlObj){
+					continue;
+				}
+				JSONArray metaUuids = urlObj.getJSONArray("metaUuids");
+				if(null == metaUuids){
+					urlObj.put("meta_uuid_size", 0);
+				} else {
+					urlObj.put("meta_uuid_size", metaUuids.size());
+				}
+				urlObj.remove("metaUuids");
+			}
+		}
+		
 		JSONArray urlArray = paramsObj.getJSONArray("resource_urls");
 		if(null == urlArray){
 			return false;
@@ -71,14 +92,21 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 	}
 	
 	private String getDomainFromUrl(String strUrl){
-		try {
-			URL url = new URL(strUrl);
-			String domain = url.getHost();
-			return domain;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
+		int start = strUrl.indexOf("//");
+		if(0 > start){
+			start = 0;
+		} else {
+			start += 2;
 		}
-		return "";
+		int end = strUrl.indexOf("/", start+1);
+		if(start > end){
+			end = strUrl.indexOf("?", start+1);
+		}
+		if(start > end){
+			end = strUrl.length();
+		}
+		String domain = strUrl.substring(start, end);
+		return domain;
 	}
 	
 }
