@@ -36,33 +36,11 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 			return false;
 		}
 		
-		//remove metaUuids when method is record_red_url
-		if("record_red_url".equals(taskInfo.getString("method"))){
-			JSONArray redUrls = paramsObj.getJSONArray("redUrls");
-			if(null == redUrls){
-				return false;
-			}
-			for(int index=0; index < redUrls.size(); index++){
-				JSONObject urlObj = redUrls.getJSONObject(index);
-				if(null == urlObj){
-					continue;
-				}
-				JSONArray metaUuids = urlObj.getJSONArray("metaUuids");
-				if(null == metaUuids){
-					urlObj.put("meta_uuid_size", 0);
-				} else {
-					urlObj.put("meta_uuid_size", metaUuids.size());
-				}
-				urlObj.remove("metaUuids");
-			}
-		}
-		
 		JSONArray urlArray = paramsObj.getJSONArray("resource_urls");
 		if(null == urlArray){
 			return false;
 		}
 		data.put("resource_size", urlArray.size());
-		paramsObj.remove("resource_urls");
 		
 		Map<String, Integer> domainMap = Maps.newConcurrentMap();
 		for(int index=0; index < urlArray.size(); index++){
@@ -88,7 +66,9 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 			domainStatList.add(new DomainStat(entry.getKey(), entry.getValue()));
 		}
 		data.put("domain_stats", domainStatList);
-		
+		paramsObj.remove("resource_urls");
+		taskInfo.put("params", paramsObj);
+		data.put("task_info", taskInfo);
 		return true;
 	}
 	

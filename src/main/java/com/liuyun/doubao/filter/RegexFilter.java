@@ -3,21 +3,13 @@ package com.liuyun.doubao.filter;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
-import com.liuyun.doubao.config.FilterConfig;
+import com.liuyun.doubao.config.filter.DefaultFilterConfig;
 import com.liuyun.doubao.config.filter.RegexFilterConfig;
 
 public class RegexFilter extends DefaultFilter {
 	
-	private RegexFilterConfig filterConfig = null;
+	private RegexFilterConfig filterConfig = new RegexFilterConfig();
 
-	@Override
-	public void init(FilterConfig filterConfig){
-		super.init(filterConfig);
-		if(filterConfig instanceof RegexFilterConfig){
-			this.filterConfig = (RegexFilterConfig)filterConfig;
-		}
-	}
-	
 	@Override
 	public boolean doFilter(JSONObject data) {
 		Map<String, Object> patternMap = this.filterConfig.getPattern();
@@ -38,6 +30,18 @@ public class RegexFilter extends DefaultFilter {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void setFilterConfig(DefaultFilterConfig filterConfig) {
+		if(filterConfig instanceof RegexFilterConfig){
+			this.filterConfig = (RegexFilterConfig)filterConfig;
+		}
+	}
+
+	@Override
+	public DefaultFilterConfig getFilterConfig() {
+		return this.filterConfig;
 	}
 
 }

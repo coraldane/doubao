@@ -17,22 +17,20 @@ public abstract class DefaultFilter implements Filter {
 	
 	private static final ExtensionLoader<Plugin> loader = ExtensionLoader.getExtensionLoader(Plugin.class);
 	
-	private DefaultFilterConfig filterConfig = null;
-	
 	private Plugin plugin = null;
 	
 	@Override
 	public void init(FilterConfig filterConfig) {
 		if(filterConfig instanceof DefaultFilterConfig){
-			this.filterConfig = (DefaultFilterConfig)filterConfig;
+			setFilterConfig((DefaultFilterConfig)filterConfig);
 		}
 		
-		if(StringUtils.isNotEmpty(this.filterConfig.getPluginName())){
-			this.plugin = loader.getExtension(this.filterConfig.getPluginName());
+		if(StringUtils.isNotEmpty(this.getFilterConfig().getPluginName())){
+			this.plugin = loader.getExtension(this.getFilterConfig().getPluginName());
 			if(null == this.plugin){
-				logger.error("plugin " + this.filterConfig.getPluginName() + " not found!");
+				logger.error("plugin " + this.getFilterConfig().getPluginName() + " not found!");
 			} else {
-				this.plugin.init(this.filterConfig.getPlugin());
+				this.plugin.init(this.getFilterConfig().getPlugin());
 			}
 		}
 	}
@@ -49,14 +47,18 @@ public abstract class DefaultFilter implements Filter {
 		if(false == this.doFilter(data)){//如果不符合匹配规则，直接进入下一过滤器
 			return true;
 		}
-		if(this.filterConfig.isDrop()){//直接丢弃
+		if(this.getFilterConfig().isDrop()){//直接丢弃
 			return false;
 		}
-		if(StringUtils.isNotEmpty(this.filterConfig.getPluginName()) && null != this.plugin){
+		if(StringUtils.isNotEmpty(this.getFilterConfig().getPluginName()) && null != this.plugin){
 			return this.plugin.filter(data);
 		}
 		return true;
 	}
+	
+	public abstract void setFilterConfig(DefaultFilterConfig filterConfig);
+	
+	public abstract DefaultFilterConfig getFilterConfig();
 
 	public abstract boolean doFilter(JSONObject data);
 }

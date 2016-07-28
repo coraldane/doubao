@@ -17,14 +17,18 @@ public class FilterTask extends TaskAdapter {
 	
 	public FilterTask(Context context) {
 		super(context);
-		this.init(context);
 	}
 	
 	@Override
 	public void init(Context context) {
 		List<FilterConfig> filterConfigs = context.getConfig().getFilters();
 		for(FilterConfig filterConfig: filterConfigs){
-			Filter filter = loader.getExtension(filterConfig.getName());
+			Filter filter = null;
+			try {
+				filter = loader.getExtension(filterConfig.getName()).getClass().newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			if(null != filter){
 				filter.init(filterConfig);
 				this.filters.add(filter);

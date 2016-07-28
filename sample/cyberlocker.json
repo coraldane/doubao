@@ -1,0 +1,35 @@
+{
+	"input": {
+		"redis": {
+			"host": "udai.com",
+			"passwd": "redis@udai",
+			"key": "logstash-cyberlocker-origin"
+		}
+	},
+	"filter": [
+		{
+			"match": {
+				"pattern": {
+					"method_name": "/saveCyberlockerData"
+				},
+				"plugin": {
+					"name": "resourceInfoPlugin",
+					"params": {
+					}
+				}
+			}
+		},
+		{
+			"match": {
+				"pattern": {
+					"method_name": "/saveRedCyberlockerData"
+				},
+				"drop": true
+			}
+		}
+	],
+	"output": {
+		"stdout": {
+		}
+	}
+}
