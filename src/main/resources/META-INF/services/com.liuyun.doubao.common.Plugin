@@ -1,1 +1,2 @@
 taskResultPlugin=com.liuyun.doubao.plugin.taskResult.TaskResultPlugin
+resourceInfoPlugin=com.liuyun.doubao.plugin.resourceInfo.ResourceInfoPlugin
