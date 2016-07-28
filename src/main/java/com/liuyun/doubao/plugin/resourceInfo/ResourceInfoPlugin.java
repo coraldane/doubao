@@ -62,6 +62,7 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 			return false;
 		}
 		data.put("resource_size", urlArray.size());
+		paramsObj.remove("resource_urls");
 		
 		Map<String, Integer> domainMap = Maps.newConcurrentMap();
 		for(int index=0; index < urlArray.size(); index++){
