@@ -2,10 +2,13 @@ package com.liuyun.doubao.plugin.resourceInfo;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.PluginConfig;
 import com.liuyun.doubao.plugin.DefaultPlugin;
@@ -58,7 +61,11 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 			domainMap.put(domain, lastCount);
 		}
 		
-		data.put("domain_stat", domainMap);
+		List<DomainStat> domainStatList = Lists.newArrayList();
+		for(Entry<String, Integer> entry: domainMap.entrySet()){
+			domainStatList.add(new DomainStat(entry.getKey(), entry.getValue()));
+		}
+		data.put("domain_stats", domainStatList);
 		
 		return true;
 	}
