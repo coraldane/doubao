@@ -39,7 +39,7 @@ public class OutputTask extends TaskAdapter {
 		this.executor = Executors.newFixedThreadPool(outputConfigs.size());
 		
 		for(OutputConfig outputConfig: outputConfigs){
-			Output output = loader.getExtension(outputConfig.getName());
+			Output output = loader.createExtension(outputConfig.getName());
 			
 			if(null != output){
 				output.init(outputConfig);

@@ -23,12 +23,7 @@ public class FilterTask extends TaskAdapter {
 	public void init(Context context) {
 		List<FilterConfig> filterConfigs = context.getConfig().getFilters();
 		for(FilterConfig filterConfig: filterConfigs){
-			Filter filter = null;
-			try {
-				filter = loader.getExtension(filterConfig.getName()).getClass().newInstance();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Filter filter = loader.createExtension(filterConfig.getName());
 			if(null != filter){
 				filter.init(filterConfig);
 				this.filters.add(filter);
