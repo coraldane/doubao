@@ -3,58 +3,83 @@ package com.liuyun.doubao.chnl.internal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.chnl.Channel;
 import com.liuyun.doubao.config.DoubaoConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.liuyun.doubao.task.FilterTask;
-import com.liuyun.doubao.task.InputTask;
-import com.liuyun.doubao.task.OutputTask;
-import com.liuyun.doubao.task.TaskAdapter;
+import com.liuyun.doubao.ctx.JsonEvent;
+import com.liuyun.doubao.ctx.JsonEventFactory;
+import com.liuyun.doubao.handler.ClosableEventHandler;
+import com.liuyun.doubao.handler.FilterEventHandler;
+import com.liuyun.doubao.handler.InputEventHandler;
+import com.liuyun.doubao.handler.OutputEventHandler;
+import com.liuyun.doubao.handler.StopableThread;
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.dsl.Disruptor;
 
 public class DefaultChannel implements Channel {
+	// Specify the size of the ring buffer, must be power of 2.
+	private static final int DEFAULT_RING_BUFFER_SIZE = 1024;
+
 	private static final ExecutorService executor = Executors.newFixedThreadPool(3);
-	
+
 	private ThreadLocal<Context> context = new ThreadLocal<Context>();
-	
-	private List<TaskAdapter> taskList = Lists.newArrayList();
-	
-	private void addTask(TaskAdapter task){
-		task.init(this.context.get());
-		this.taskList.add(task);
-	}
-	
+
+	private StopableThread inputEventHandler = null;
+	private List<ClosableEventHandler> handlerList = Lists.newArrayList();
+
 	@Override
-	public void setConfig(DoubaoConfig config){
+	public void setConfig(DoubaoConfig config) {
 		Context ctx = new Context(config);
 		this.context.set(ctx);
 	}
 
 	@Override
 	public void start() {
-		TaskAdapter inputTask = new InputTask(this.context.get());
-		addTask(inputTask);
-		executor.submit(inputTask);
+		Context ctx = this.context.get();
 		
-		TaskAdapter filterTask = new FilterTask(this.context.get());
-		addTask(filterTask);
-		executor.submit(filterTask);
+		ClosableEventHandler filterHandler = new FilterEventHandler();
+		this.addHandler(filterHandler, ctx);
+		ctx.setFilterQueue(this.makeRingBuffer(filterHandler));
 		
-		TaskAdapter outputTask = new OutputTask(this.context.get());
-		addTask(outputTask);
-		executor.submit(outputTask);
+		ClosableEventHandler outputHandler = new OutputEventHandler();
+		this.addHandler(outputHandler, ctx);
+		ctx.setOutputQueue(this.makeRingBuffer(outputHandler));
+
+		this.inputEventHandler = new InputEventHandler(ctx);
+		this.inputEventHandler.init(this.context.get());
+		executor.submit(this.inputEventHandler);
 	}
 
 	@Override
 	public void stop() {
-		for(int index=0; index < this.taskList.size(); index++){
-			TaskAdapter task = this.taskList.get(index);
-			task.stop(0 == index?false:true);
+		Context ctx = this.context.get();
+		this.inputEventHandler.stop(false);
+		this.inputEventHandler.destroy(ctx);
+		
+		ctx.stop();
+		for(ClosableEventHandler handler: this.handlerList){
+			handler.destroy(ctx);
 		}
-		for(TaskAdapter task: this.taskList){
-			task.destroy(this.context.get());
-		}
+	}
+	
+	private void addHandler(ClosableEventHandler handler, Context context){
+		handler.init(context);
+		this.handlerList.add(handler);
+	}
+
+	@SuppressWarnings("unchecked")
+	private RingBuffer<JsonEvent> makeRingBuffer(EventHandler<JsonEvent> handler) {
+		ThreadFactory threadFactory = Executors.defaultThreadFactory();
+		JsonEventFactory factory = new JsonEventFactory();
+		Disruptor<JsonEvent> disruptor = new Disruptor<JsonEvent>(factory, DEFAULT_RING_BUFFER_SIZE, threadFactory);
+		disruptor.handleEventsWith(handler);
+		disruptor.start();
+
+		return disruptor.getRingBuffer();
 	}
 
 }

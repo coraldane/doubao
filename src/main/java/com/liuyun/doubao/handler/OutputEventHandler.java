@@ -1,4 +1,4 @@
-package com.liuyun.doubao.task;
+package com.liuyun.doubao.handler;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -8,26 +8,28 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.OutputConfig;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.ctx.JsonEvent;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Output;
 
-public class OutputTask extends TaskAdapter {
+public class OutputEventHandler implements ClosableEventHandler {
+	
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	private static final ExtensionLoader<Output> loader = ExtensionLoader.getExtensionLoader(Output.class);
 	
 	private List<OutputThread> outputThreads = Lists.newArrayList();
 	
 	private ExecutorService executor = null;
 	
-	public OutputTask(Context context) {
-		super(context);
-	}
-
 	@Override
 	public void init(Context context) {
 		List<OutputConfig> outputConfigs = context.getConfig().getOutputs();
@@ -39,7 +41,12 @@ public class OutputTask extends TaskAdapter {
 		this.executor = Executors.newFixedThreadPool(outputConfigs.size());
 		
 		for(OutputConfig outputConfig: outputConfigs){
-			Output output = loader.createExtension(outputConfig.getName());
+			Output output = null;
+			try {
+				output = loader.getExtension(outputConfig.getName()).getClass().newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			if(null != output){
 				output.init(outputConfig);
@@ -51,23 +58,19 @@ public class OutputTask extends TaskAdapter {
 	}
 
 	@Override
-	public boolean doTask(Context context) throws Exception {
-		JSONObject data = this.context.getOutputQueue().poll(DEFAULT_POLL_TIMEOUT, TimeUnit.SECONDS);
-		if(null == data){
-			return false;
-		}
-		for(OutputThread thread: this.outputThreads){
-			thread.pushData(data);
-		}
-		return !this.context.getOutputQueue().isEmpty();
-	}
-
-	@Override
 	public void destroy(Context context) {
-		super.waitForStoped();
 		this.executor.shutdown();
 		for(OutputThread thread: this.outputThreads){
 			thread.getOutput().destroy();
+		}
+	}
+
+	@Override
+	public void onEvent(JsonEvent event, long arg1, boolean arg2) throws Exception {
+		// TODO Auto-generated method stub
+		JSONObject data = event.get();
+		for(OutputThread thread: this.outputThreads){
+			thread.pushData(data);
 		}
 	}
 }

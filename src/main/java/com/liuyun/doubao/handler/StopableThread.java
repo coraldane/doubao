@@ -1,11 +1,12 @@
-package com.liuyun.doubao.task;
+package com.liuyun.doubao.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.ctx.Context;
 
-public abstract class TaskAdapter implements Task{
+public abstract class StopableThread implements InitializingBean, Runnable {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -17,7 +18,7 @@ public abstract class TaskAdapter implements Task{
 	
 	protected Context context = null;
 	
-	public TaskAdapter(Context context){
+	public StopableThread(Context context){
 		this.context = context;
 	}
 	
@@ -61,4 +62,11 @@ public abstract class TaskAdapter implements Task{
 		}
 	}
 	
+	/**
+	 * 
+	 * @param context
+	 * @return 任务是否继续
+	 * @throws Exception
+	 */
+	public abstract boolean doTask(Context context) throws Exception;
 }

@@ -345,7 +345,7 @@ public class ExtensionLoader<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public T createExtension(String name) {
+    private T createExtension(String name) {
         Class<?> clazz = getExtensionClasses().get(name);
         if (clazz == null) {
             throw findException(name);
