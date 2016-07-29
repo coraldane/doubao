@@ -26,43 +26,40 @@ public class DefaultChannel implements Channel {
 
 	private static final ExecutorService executor = Executors.newFixedThreadPool(3);
 
-	private ThreadLocal<Context> context = new ThreadLocal<Context>();
+	private Context context = null;
 
 	private StopableThread inputEventHandler = null;
 	private List<ClosableEventHandler> handlerList = Lists.newArrayList();
 
 	@Override
 	public void setConfig(DoubaoConfig config) {
-		Context ctx = new Context(config);
-		this.context.set(ctx);
+		this.context = new Context(config);
 	}
 
 	@Override
 	public void start() {
-		Context ctx = this.context.get();
-		
 		ClosableEventHandler filterHandler = new FilterEventHandler();
-		this.addHandler(filterHandler, ctx);
-		ctx.setFilterQueue(this.makeRingBuffer(filterHandler));
+		this.addHandler(filterHandler, this.context);
+		this.context.setFilterQueue(this.makeRingBuffer(filterHandler));
 		
 		ClosableEventHandler outputHandler = new OutputEventHandler();
-		this.addHandler(outputHandler, ctx);
-		ctx.setOutputQueue(this.makeRingBuffer(outputHandler));
+		this.addHandler(outputHandler, this.context);
+		this.context.setOutputQueue(this.makeRingBuffer(outputHandler));
 
-		this.inputEventHandler = new InputEventHandler(ctx);
-		this.inputEventHandler.init(this.context.get());
+		this.inputEventHandler = new InputEventHandler(this.context);
+		this.inputEventHandler.init(this.context);
 		executor.submit(this.inputEventHandler);
 	}
 
 	@Override
 	public void stop() {
-		Context ctx = this.context.get();
 		this.inputEventHandler.stop(false);
-		this.inputEventHandler.destroy(ctx);
 		
-		ctx.stop();
+		this.context.stop();
+		
+		this.inputEventHandler.destroy(this.context);
 		for(ClosableEventHandler handler: this.handlerList){
-			handler.destroy(ctx);
+			handler.destroy(this.context);
 		}
 	}
 	
