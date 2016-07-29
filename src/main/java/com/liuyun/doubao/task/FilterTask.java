@@ -7,10 +7,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.FilterConfig;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.ctx.JsonEvent;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Filter;
+import com.lmax.disruptor.EventHandler;
 
-public class FilterTask extends TaskAdapter {
+public class FilterTask extends TaskAdapter implements EventHandler<JsonEvent> {
 	private static final ExtensionLoader<Filter> loader = ExtensionLoader.getExtensionLoader(Filter.class);
 	
 	private List<Filter> filters = Lists.newArrayList();
@@ -49,6 +51,22 @@ public class FilterTask extends TaskAdapter {
 			this.context.put2Output(data);
 		}
 		return !this.context.getFilterQueue().isEmpty();
+	}
+	
+	@Override
+	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
+		// TODO Auto-generated method stub
+		JSONObject data = event.get();
+		boolean denied = false;
+		for(Filter filter: this.filters){
+			if(!filter.doMatch(data)){
+				denied = true;
+				break;
+			}
+		}
+		if(!denied){
+			this.context.put2Output(data);
+		}
 	}
 
 	@Override
