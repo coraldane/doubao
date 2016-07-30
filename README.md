@@ -5,7 +5,7 @@
 特意设计了Plugin(插件)机制，用户可以根据自己的情况进行扩展。   
 整个项目借鉴优秀的开源框架Dubbo(https://github.com/alibaba/dubbo) 中的SPI来实现。   
 所有的input, output, filter和plugin都可以扩展。灵活度高。   
-消息传递使用优秀的高并发框架Disruptor(https://github.com/LMAX-Exchange/disruptor)中的RingBuffer来实现   
+消息传递使用优秀的高并发框架Disruptor(https://github.com/LMAX-Exchange/disruptor) 中的RingBuffer来实现   
 
 ## Quick Start
 
