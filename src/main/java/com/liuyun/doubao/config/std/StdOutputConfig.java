@@ -4,7 +4,7 @@ import com.liuyun.doubao.config.OutputConfig;
 
 public class StdOutputConfig implements OutputConfig {
 
-	private static final int BATCH_SIZE_DEFAULT = 100;
+	private static final int BATCH_SIZE_DEFAULT = 10;
 
 	private int batchSize = BATCH_SIZE_DEFAULT;
 	

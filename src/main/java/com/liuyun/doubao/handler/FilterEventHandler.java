@@ -52,7 +52,6 @@ public class FilterEventHandler implements ClosableEventHandler {
 
 	@Override
 	public void destroy(Context context) {
-//		super.waitForStoped();
 		for(Filter filter: this.filters){
 			filter.destroy();
 		}

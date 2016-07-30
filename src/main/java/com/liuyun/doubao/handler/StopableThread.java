@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.ctx.Context;
 
-public abstract class StopableThread implements InitializingBean, Runnable {
+public abstract class StopableThread extends Thread implements InitializingBean {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
