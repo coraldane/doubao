@@ -34,7 +34,7 @@ function start() {
         echo "Config file $conf doesn't exist."
         return 1
     fi
-    java -jar doubao-1.0.0-jar-with-dependencies.jar $conf &> $logfile &
+    java -jar doubao-1.0.0-standalone.jar $conf &> $logfile &
     sleep 1
     running=`ps -p $! | grep -v "PID TTY" | wc -l`
     if [ $running -gt 0 ];then

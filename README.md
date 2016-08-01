@@ -18,11 +18,11 @@ git clone https://github.com/coraldane/doubao.git
 cd doubao
 sh package_war.sh  
 ```
-执行后会在target子目录下生成文件doubao-1.0.0-jar-with-dependencies.jar   
+执行后会在target子目录下生成文件doubao-1.0.0-standalone.jar   
 这个文件是可执行的JAR文件，里面包含了所有依赖的jar(共4.5MB)  
 启动服务：   
 ```
-java -jar doubao-1.0.0-jar-with-dependencies.jar cfg.json
+java -jar doubao-1.0.0-standalone.jar cfg.json
 ```
 也可以将jar文件和工程中的control文件复制到同一目录，以后台模式启动   
 ```
