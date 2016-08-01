@@ -10,4 +10,6 @@ public interface InputConfig {
 	void setAddedFieldMap(Map<String, Object> fieldsMap);
 	
 	Map<String, Object> getAddedFieldMap();
+	
+	
 }

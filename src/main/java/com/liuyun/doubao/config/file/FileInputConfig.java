@@ -6,6 +6,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.AbstractInputConfig;
+import com.liuyun.doubao.config.CodecConfig;
+import com.liuyun.doubao.config.codec.PlainCodecConfig;
 
 @Identified(name="file")
 public class FileInputConfig extends AbstractInputConfig {
@@ -20,6 +22,8 @@ public class FileInputConfig extends AbstractInputConfig {
 	//one of ["beginning", "end"]
 	@JSONField(name="start_position")
 	private String startPosition = "end";
+	
+	private CodecConfig codec = new PlainCodecConfig();
 
 	public String[] getPath() {
 		return path;
@@ -67,6 +71,14 @@ public class FileInputConfig extends AbstractInputConfig {
 
 	public void setStartPosition(String startPosition) {
 		this.startPosition = startPosition;
+	}
+
+	public CodecConfig getCodec() {
+		return codec;
+	}
+
+	public void setCodec(CodecConfig codec) {
+		this.codec = codec;
 	}
 	
 }

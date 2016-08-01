@@ -7,14 +7,6 @@ import com.liuyun.doubao.config.PluginConfig;
 @Identified(name="default")
 public class DefaultFilterConfig implements FilterConfig {
 
-	private String name;
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	private boolean drop = false;
 	private PluginConfig plugin = new PluginConfig();
 	public boolean isDrop() {
