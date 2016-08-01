@@ -33,8 +33,8 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 
 	@Override
 	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
-		while(this.dataBuffer.size() >= this.batchSize){
-			Thread.sleep(100);
+		if(this.dataBuffer.size() >= this.batchSize){
+			throw new RuntimeException("wait for write data...");
 		}
 		
 		this.dataBuffer.add(event.get());
