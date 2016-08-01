@@ -3,8 +3,6 @@ package com.liuyun.doubao.config;
 import com.liuyun.doubao.extension.SPI;
 
 @SPI
-public interface OutputConfig {
+public interface CodecConfig {
 
-	int getBatchSize();
-	
 }

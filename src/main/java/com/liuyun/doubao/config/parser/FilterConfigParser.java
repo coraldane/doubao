@@ -24,7 +24,6 @@ public class FilterConfigParser {
 				}
 				String strJson = json.getString(key);
 				FilterConfig filterConfig = JSON.parseObject(strJson, loader.getExtension(key).getClass());
-				filterConfig.setName(key);
 				retList.add(filterConfig);
 			}
 		}

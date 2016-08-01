@@ -1,8 +1,10 @@
 package com.liuyun.doubao.handler;
 
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.extension.ExtensionLoader;
@@ -24,8 +26,8 @@ public class InputEventHandler extends StopableThread {
 			logger.error("input config is null.");
 			return;
 		}
-
-		this.input = loader.getExtension(inputConfig.getName());
+		
+		this.input = loader.createExtensionByIdentified(inputConfig.getClass().getAnnotation(Identified.class));
 		if (null != this.input) {
 			this.input.init(inputConfig);
 		}
@@ -37,8 +39,9 @@ public class InputEventHandler extends StopableThread {
 			return false;
 		}
 		List<JSONObject> dataList = this.input.read();
-		for (JSONObject obj : dataList) {
-			Context.putData2Queue(context.getFilterQueue(), obj);
+		for (JSONObject json : dataList) {
+			JSONObject data = this.assemableData(json);
+			Context.putData2Queue(context.getFilterQueue(), data);
 		}
 		return true;
 	}
@@ -51,4 +54,14 @@ public class InputEventHandler extends StopableThread {
 		}
 	}
 
+	private JSONObject assemableData(JSONObject json){
+		InputConfig inputConfig = this.context.getConfig().getInput();
+		Map<String, Object> addedFieldMap = inputConfig.getAddedFieldMap();
+		if(null != addedFieldMap && !addedFieldMap.isEmpty()){
+			for(String key: addedFieldMap.keySet()){
+				json.put(key, addedFieldMap.get(key));
+			}
+		}
+		return json;
+	}
 }

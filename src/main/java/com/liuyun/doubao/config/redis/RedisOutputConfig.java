@@ -1,8 +1,10 @@
 package com.liuyun.doubao.config.redis;
 
 import com.liuyun.doubao.bean.RedisConfig;
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.OutputConfig;
 
+@Identified(name="redis")
 public class RedisOutputConfig extends RedisConfig implements OutputConfig {
 
 	private static final int BATCH_SIZE_DEFAULT = 100;

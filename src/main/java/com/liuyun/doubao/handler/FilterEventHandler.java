@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.FilterConfig;
 import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.ctx.JsonEvent;
@@ -22,12 +23,7 @@ public class FilterEventHandler implements ClosableEventHandler {
 		this.context = context;
 		List<FilterConfig> filterConfigs = context.getConfig().getFilters();
 		for(FilterConfig filterConfig: filterConfigs){
-			Filter filter = null;
-			try {
-				filter = loader.getExtension(filterConfig.getName()).getClass().newInstance();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Filter filter = loader.createExtensionByIdentified(filterConfig.getClass().getAnnotation(Identified.class));
 			if(null != filter){
 				filter.init(filterConfig);
 				this.filters.add(filter);

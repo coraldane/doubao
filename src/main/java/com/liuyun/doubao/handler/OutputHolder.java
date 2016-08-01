@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.config.OutputConfig;
 import com.liuyun.doubao.ctx.Context;
@@ -34,12 +35,7 @@ public class OutputHolder implements InitializingBean {
 		
 		executor = Executors.newFixedThreadPool(outputConfigs.size());
 		for(OutputConfig outputConfig: outputConfigs){
-			Output output = null;
-			try {
-				output = loader.getExtension(outputConfig.getName()).getClass().newInstance();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Output output = loader.createExtensionByIdentified(outputConfig.getClass().getAnnotation(Identified.class));
 			
 			if(null != output){
 				output.init(outputConfig);

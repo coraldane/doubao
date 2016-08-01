@@ -27,7 +27,6 @@ public class InputConfigParser {
 			}
 			String strJson = inputJson.getString(key);
 			InputConfig inputConfig = JSON.parseObject(strJson, loader.getExtension(key).getClass());
-			inputConfig.setName(key);
 			return inputConfig;
 		}
 		return null;

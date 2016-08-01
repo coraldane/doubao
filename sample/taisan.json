@@ -1,0 +1,35 @@
+{
+	"input": {
+		"redis": {
+			"host": "elastic.ops.vobile.org",
+			"passwd": "******",
+			"key": "logstash-taisan-origin"
+		}
+	},
+	"filter": [
+		{
+			"match": {
+				"pattern": {
+					"logger_title": "TASK ENDS",
+					"log_level": "DEBUG"
+				},
+				"plugin": {
+					"name": "taskResultPlugin",
+					"params": {
+						"redis_host": "elastic.ops.vobile.org",
+						"redis_port": 6379,
+						"redis_passwd": "******",
+						"redis_key": "task_result_buffer"
+					}
+				}
+			}
+		}
+	],
+	"output": {
+		"redis": {
+			"host": "elastic.ops.vobile.org",
+			"passwd": "******",
+			"key": "logstash-taisan-dest"
+		}
+	}
+}

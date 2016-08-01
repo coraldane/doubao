@@ -3,7 +3,9 @@ package com.liuyun.doubao.config.filter;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.liuyun.doubao.common.Identified;
 
+@Identified(name="match")
 public class MatchFilterConfig extends DefaultFilterConfig {
 
 	private Map<String, Object> pattern = Maps.newConcurrentMap();

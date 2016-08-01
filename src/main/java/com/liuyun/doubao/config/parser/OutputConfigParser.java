@@ -21,7 +21,6 @@ public class OutputConfigParser {
 			}
 			String strJson = outputJson.getString(key);
 			OutputConfig outputConfig = JSON.parseObject(strJson, loader.getExtension(key).getClass());
-			outputConfig.setName(key);
 			retList.add(outputConfig);
 		}
 		return retList;

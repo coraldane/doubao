@@ -1,8 +1,10 @@
 package com.liuyun.doubao.config.filter;
 
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.FilterConfig;
 import com.liuyun.doubao.config.PluginConfig;
 
+@Identified(name="default")
 public class DefaultFilterConfig implements FilterConfig {
 
 	private String name;

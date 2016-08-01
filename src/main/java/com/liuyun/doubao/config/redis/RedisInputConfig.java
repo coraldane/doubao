@@ -1,9 +1,18 @@
 package com.liuyun.doubao.config.redis;
 
+import java.util.Map;
+
+import com.alibaba.fastjson.annotation.JSONField;
+import com.google.common.collect.Maps;
 import com.liuyun.doubao.bean.RedisConfig;
+import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.InputConfig;
 
+@Identified(name="redis")
 public class RedisInputConfig extends RedisConfig implements InputConfig {
+	
+	@JSONField(name="add_field")
+	private Map<String, Object> addedFieldMap = Maps.newConcurrentMap();
 	
 	private String name;
 
@@ -33,4 +42,13 @@ public class RedisInputConfig extends RedisConfig implements InputConfig {
 	public void setKey(String key) {
 		this.key = key;
 	}
+
+	public Map<String, Object> getAddedFieldMap() {
+		return addedFieldMap;
+	}
+
+	public void setAddedFieldMap(Map<String, Object> addedFieldMap) {
+		this.addedFieldMap = addedFieldMap;
+	}
+
 }
