@@ -1,9 +1,10 @@
 {
 	"input": {
-		"redis": {
-			"host": "udai.com",
-			"passwd": "redis@udai",
-			"key": "logstash-cyberlocker-origin"
+		"file": {
+			"path": ["/opt/deploy/*", "/Users/coral/Downloads/*.txt"],
+			"exclude": ["*.gz"],
+			"type": "cyberlocker",
+			"start_position": "beginning"
 		}
 	},
 	"filter": [

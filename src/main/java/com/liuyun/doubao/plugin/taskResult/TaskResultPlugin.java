@@ -2,8 +2,8 @@ package com.liuyun.doubao.plugin.taskResult;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.liuyun.doubao.bean.RedisConfig;
 import com.liuyun.doubao.config.PluginConfig;
+import com.liuyun.doubao.config.redis.RedisConfig;
 import com.liuyun.doubao.plugin.DefaultPlugin;
 import com.liuyun.doubao.service.JedisService;
 import com.liuyun.doubao.utils.StringUtils;

@@ -1,6 +1,5 @@
 package com.liuyun.doubao.config.redis;
 
-import com.liuyun.doubao.bean.RedisConfig;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.OutputConfig;
 

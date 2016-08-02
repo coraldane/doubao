@@ -39,6 +39,9 @@ public class InputEventHandler extends StopableThread {
 			return false;
 		}
 		List<JSONObject> dataList = this.input.read();
+		if(null == dataList){
+			return false;
+		}
 		for (JSONObject json : dataList) {
 			JSONObject data = this.assemableData(json);
 			Context.putData2Queue(context.getFilterQueue(), data);

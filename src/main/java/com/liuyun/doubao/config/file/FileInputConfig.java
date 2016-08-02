@@ -7,10 +7,12 @@ import com.google.common.collect.Maps;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.AbstractInputConfig;
 import com.liuyun.doubao.config.CodecConfig;
-import com.liuyun.doubao.config.codec.PlainCodecConfig;
+import com.liuyun.doubao.extension.ExtensionLoader;
 
 @Identified(name="file")
 public class FileInputConfig extends AbstractInputConfig {
+	
+	private static ExtensionLoader<CodecConfig> codecLoader = ExtensionLoader.getExtensionLoader(CodecConfig.class);
 
 	private String[] path;
 	private String[] exclude;
@@ -23,7 +25,7 @@ public class FileInputConfig extends AbstractInputConfig {
 	@JSONField(name="start_position")
 	private String startPosition = "end";
 	
-	private CodecConfig codec = new PlainCodecConfig();
+	private CodecConfig codec = codecLoader.getDefaultExtension();
 
 	public String[] getPath() {
 		return path;
@@ -77,8 +79,8 @@ public class FileInputConfig extends AbstractInputConfig {
 		return codec;
 	}
 
-	public void setCodec(CodecConfig codec) {
-		this.codec = codec;
+	public void setCodec(String codec) {
+		this.codec = codecLoader.getExtension(codec);
 	}
-	
+
 }

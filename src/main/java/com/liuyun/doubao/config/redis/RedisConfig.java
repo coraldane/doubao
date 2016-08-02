@@ -1,4 +1,4 @@
-package com.liuyun.doubao.bean;
+package com.liuyun.doubao.config.redis;
 
 public class RedisConfig {
 

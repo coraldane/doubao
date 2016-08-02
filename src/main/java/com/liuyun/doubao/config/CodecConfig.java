@@ -2,7 +2,7 @@ package com.liuyun.doubao.config;
 
 import com.liuyun.doubao.extension.SPI;
 
-@SPI
+@SPI("plain")
 public interface CodecConfig {
 
 }

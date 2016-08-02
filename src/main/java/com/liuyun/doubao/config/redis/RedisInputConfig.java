@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.Maps;
-import com.liuyun.doubao.bean.RedisConfig;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.InputConfig;
 
