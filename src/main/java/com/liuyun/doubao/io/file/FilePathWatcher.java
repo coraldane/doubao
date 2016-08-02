@@ -117,7 +117,6 @@ public class FilePathWatcher implements Runnable {
 			WatchKey key;
 			try {
 				key = watcher.take();
-				// key = this.watcher.poll(3, TimeUnit.SECONDS);
 			} catch (InterruptedException x) {
 				return;
 			}
