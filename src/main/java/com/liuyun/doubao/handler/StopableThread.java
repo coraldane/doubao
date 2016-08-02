@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.utils.SysUtils;
 
 public abstract class StopableThread extends Thread implements InitializingBean {
 	
@@ -29,6 +30,7 @@ public abstract class StopableThread extends Thread implements InitializingBean 
 				boolean result = doTask(this.context);
 				if(!result){
 					continued = false;
+					SysUtils.sleep(1000);//if return false please sleep one second to forbid CPU 100%
 				}
 			}
 			stoped = true;
