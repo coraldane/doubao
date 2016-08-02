@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -21,12 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 
 public class FilePathWatcher implements Runnable {
 	
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	private final WatchService watcher;
 	private final Map<WatchKey,Path> keys;
+	private final PathMatcher pathMatcher;
 	
 	private boolean recursive = false;
 
@@ -34,6 +41,7 @@ public class FilePathWatcher implements Runnable {
 	
 	public FilePathWatcher(Path path, String glob, boolean recursive) throws IOException{
 		this.watcher = FileSystems.getDefault().newWatchService();
+		this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
         this.keys = new HashMap<WatchKey,Path>();
         this.recursive = recursive;
         
@@ -48,7 +56,6 @@ public class FilePathWatcher implements Runnable {
 	}
 	
 	private void initMatcher(final Path start, String glob, final boolean recursive) throws IOException{
-		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
 		Files.walkFileTree(start, new SimpleFileVisitor<Path>(){
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -77,10 +84,10 @@ public class FilePathWatcher implements Runnable {
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         Path prev = keys.get(key);
         if (prev == null) {
-            System.out.printf("register: %s\n", dir);
+            logger.debug("register: %s\n", dir);
         } else {
             if (!dir.equals(prev)) {
-                System.out.printf("update: %s -> %s\n", prev, dir);
+                logger.debug("update: %s -> %s\n", prev, dir);
             }
         }
         keys.put(key, dir);
@@ -120,15 +127,16 @@ public class FilePathWatcher implements Runnable {
                 Path name = ev.context();
                 Path child = dir.resolve(name);
  
-                // print out event
-                System.out.printf("%s: %s\n", event.kind().name(), child);
- 
+                this.handleWatchEvent(event.kind(), child);
+                
                 // if directory is created, and watching recursively, then
                 // register it and its sub-directories
                 if (recursive && (kind == ENTRY_CREATE)) {
                     try {
                         if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
                             registerAll(child);
+                        } else if (pathMatcher.matches(child)) {
+                            matchedPaths.add(child);
                         }
                     } catch (IOException x) {
                         // ignore to keep sample readbale
@@ -147,6 +155,10 @@ public class FilePathWatcher implements Runnable {
                 }
             }
         }
+    }
+    
+    private void handleWatchEvent(Kind<?> kind, Path child){
+    	System.out.printf("%s: %s\n", kind.name(), child);
     }
     
     @SuppressWarnings("unchecked")

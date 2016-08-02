@@ -57,7 +57,7 @@ public class FileInput implements Input {
 			}
 			
 			String pathHash = DigestUtils.md2Hex(filepath);
-			FilePathWatcher pathWatcher = new FilePathWatcher(start, "glob:" + resolver.getGlob(), this.inputConfig.isRecursive());
+			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig.isRecursive());
 			this.pathWatcherMap.put(pathHash, pathWatcher);
 			executor.submit(pathWatcher);
 		}
