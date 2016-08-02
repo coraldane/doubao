@@ -1,7 +1,8 @@
 {
 	"input": {
 		"file": {
-			"path": ["/opt/deploy/*", "/Users/coral/Downloads/*.txt"],
+			"path": ["/opt/deploy/logs/**.log", "/Users/coraldane/Downloads/**.txt"],
+			"recursive": true,
 			"exclude": ["*.gz"],
 			"type": "cyberlocker",
 			"start_position": "beginning"

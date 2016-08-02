@@ -17,6 +17,7 @@ public class FileInputConfig extends AbstractInputConfig {
 	private String[] path;
 	private String[] exclude;
 	private String delimiter = "\n";
+	private boolean recursive = false;
 	
 	private Map<String, String> tags = Maps.newConcurrentMap();
 	private String type = null;
@@ -81,6 +82,14 @@ public class FileInputConfig extends AbstractInputConfig {
 
 	public void setCodec(String codec) {
 		this.codec = codecLoader.getExtension(codec);
+	}
+
+	public boolean isRecursive() {
+		return recursive;
+	}
+
+	public void setRecursive(boolean recursive) {
+		this.recursive = recursive;
 	}
 
 }
