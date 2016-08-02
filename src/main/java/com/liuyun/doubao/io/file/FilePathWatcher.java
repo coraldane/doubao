@@ -84,8 +84,7 @@ public class FilePathWatcher implements Runnable {
 	private void register(Path dir) throws IOException {
 		Modifier high = get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH();
 		WatchKey key = dir.register(watcher, new WatchEvent.Kind[] { StandardWatchEventKinds.ENTRY_CREATE,
-						StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY },
-				high);
+						StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY }, high);
 		Path prev = keys.get(key);
 		if (prev == null) {
 			logger.debug("register: {}", dir);
