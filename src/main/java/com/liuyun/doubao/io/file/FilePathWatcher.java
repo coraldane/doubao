@@ -184,4 +184,12 @@ public class FilePathWatcher implements Runnable {
             }
         });
     }
+    
+    public void destroy() {
+    	try {
+			this.watcher.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 }

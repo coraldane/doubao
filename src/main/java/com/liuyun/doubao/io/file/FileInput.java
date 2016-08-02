@@ -65,8 +65,11 @@ public class FileInput implements Input {
 	
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-
+		this.executor.shutdown();
+		for(String key: this.pathWatcherMap.keySet()){
+			FilePathWatcher pathWatcher = this.pathWatcherMap.get(key);
+			pathWatcher.destroy();
+		}
 	}
 
 	@Override
