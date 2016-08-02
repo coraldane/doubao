@@ -84,10 +84,10 @@ public class FilePathWatcher implements Runnable {
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         Path prev = keys.get(key);
         if (prev == null) {
-            logger.debug("register: %s\n", dir);
+            logger.debug("register: {}", dir);
         } else {
             if (!dir.equals(prev)) {
-                logger.debug("update: %s -> %s\n", prev, dir);
+                logger.debug("update: {} -> {}", prev, dir);
             }
         }
         keys.put(key, dir);

@@ -28,16 +28,12 @@
 		</filter>
 	</appender>
 	
-	<logger name="org.springframework.jdbc" additivity="true">
-		<level value="info" />
-	</logger>
-	
-	<logger name="org.springframework.core.env" additivity="true">
-		<level value="info" />
+	<logger name="com.liuyun.doubao.io.file" additivity="true">
+		<level value="INFO" />
 	</logger>
 	
 	<root>
-        <level value="info"/>
+        <level value="INFO"/>
 		<appender-ref ref="myConsole" />
 		<appender-ref ref="errorFile"/>
 	</root>
