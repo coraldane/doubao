@@ -34,6 +34,7 @@ public class FileInput implements Input {
 	private ExecutorService pathWatchExecutor = Executors.newCachedThreadPool();
 	
 	private List<FilePathWatcher> pathWatcherList = Lists.newArrayList();
+	private Map<String, SincedbHandler> sincedbHandlerMap = Maps.newConcurrentMap();
 	private Map<FileUniqueKey, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
 	
 	private FileInputConfig inputConfig = null;
@@ -70,7 +71,10 @@ public class FileInput implements Input {
 			SincedbHandler sincedbHandler = new SincedbHandler(hashKey, inputConfig);
 			PathChangeEventListener eventListener = new PathChangeEventListener(sincedbHandler, this.fileReaderMap);
 			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig, eventListener);
+			
 			this.pathWatcherList.add(pathWatcher);
+			this.sincedbHandlerMap.put(hashKey, sincedbHandler);
+			
 			this.pathWatchExecutor.submit(pathWatcher);
 		}
 	}
@@ -85,6 +89,10 @@ public class FileInput implements Input {
 		//close file channel
 		for(SingleFileReader fileReader: this.fileReaderMap.values()){
 			fileReader.destroy();
+		}
+		
+		for(SincedbHandler handler: this.sincedbHandlerMap.values()){
+			handler.flush();
 		}
 	}
 

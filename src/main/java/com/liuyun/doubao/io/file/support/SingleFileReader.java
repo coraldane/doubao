@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
+import com.liuyun.doubao.utils.DateUtils;
 import com.liuyun.doubao.utils.StringUtils;
+import com.liuyun.doubao.utils.SysUtils;
 
 public class SingleFileReader {
 	
@@ -27,15 +29,20 @@ public class SingleFileReader {
 	private FileUniqueKey fileKey;
 	private SincedbHandler sincedbHandler;
 	
+	private MessageBean messageBean = new MessageBean();
+	
 	public SingleFileReader(Path path, FileUniqueKey fileKey, SincedbHandler sincedbHandler) throws IOException {
 		this.fileKey = fileKey;
 		this.sincedbHandler = sincedbHandler;
 		this.fileHandler = new RandomAccessFile(path.toFile(), "r");
+		this.messageBean.setPath(path.toString());
 		
 		this.init();
 	}
 	
 	private void init(){
+		this.messageBean.setHost(SysUtils.getHostName());
+		
 		FileInputConfig inputConfig = this.sincedbHandler.getFileInputConfig();
 		try {
 			long offset = 0;
@@ -66,6 +73,9 @@ public class SingleFileReader {
 		if(CollectionUtils.isNotEmpty(strLineList)){
 			for(String strLine: strLineList){
 				JSONObject json = new JSONObject();
+				json.put("@timestamp", DateUtils.formatNow(DateUtils.DATE_FORMAT_DEFAULT));
+				json.put("host", this.messageBean.getHost());
+				json.put("path", this.messageBean.getPath());
 				json.put("message", strLine);
 				retList.add(json);
 			}
@@ -99,7 +109,7 @@ public class SingleFileReader {
 		
 		return retList;
 	}
-
+	
 	public void setReady(boolean ready) {
 		this.ready = ready;
 	}
