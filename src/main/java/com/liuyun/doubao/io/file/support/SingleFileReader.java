@@ -47,7 +47,11 @@ public class SingleFileReader {
 		try {
 			long offset = 0;
 			if("end".equals(inputConfig.getStartPosition())){
-				offset = this.fileHandler.length();
+				if(0 == this.sincedbHandler.getOffset(this.fileKey)){
+					offset = this.fileHandler.length();
+				} else {
+					offset = this.sincedbHandler.getOffset(this.fileKey);
+				}
 			}
 			this.sincedbHandler.setOffset(this.fileKey, offset);
 		} catch (IOException e) {

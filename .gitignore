@@ -6,3 +6,5 @@
 .project
 /logs/
 cfg.example.json
+/data/
+/data/.sincedb_*

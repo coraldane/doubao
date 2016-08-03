@@ -1,6 +1,6 @@
 package com.liuyun.doubao.io.file.support;
 
-public class FileUniqueKey {
+public class FileUniqueKey implements Comparable<FileUniqueKey>{
 	
 	private String inode;
 	private String device;
@@ -23,16 +23,11 @@ public class FileUniqueKey {
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof FileUniqueKey){
-			FileUniqueKey fileKey = (FileUniqueKey)obj;
-			return this.inode.equals(fileKey.getInode()) && this.device.equals(fileKey.getDevice());
-		}
-		return false;
-	}
-	
-	@Override
 	public String toString(){
 		return this.inode + "," + this.device;
+	}
+	@Override
+	public int compareTo(FileUniqueKey o) {
+		return (this.inode + this.device).compareTo(o.getInode() + o.getDevice());
 	}
 }

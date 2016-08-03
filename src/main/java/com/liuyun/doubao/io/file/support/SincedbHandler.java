@@ -7,11 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +34,7 @@ public class SincedbHandler implements Runnable {
 	private FileInputConfig fileInputConfig = null;
 	
 	private Path dataFolder = null;
-	private Map<FileUniqueKey, Long> offsetMap = Maps.newConcurrentMap();
+	private Map<String, Long> offsetMap = Maps.newConcurrentMap();
 
 	public SincedbHandler(String hash, FileInputConfig inputConfig) throws IOException{
 		this.hashKey = hash;
@@ -50,16 +48,19 @@ public class SincedbHandler implements Runnable {
 		return fileInputConfig;
 	}
 
-	public Long getOffset(FileUniqueKey fileKey){
-		return this.offsetMap.get(fileKey);
+	public long getOffset(FileUniqueKey fileKey){
+		if(this.offsetMap.containsKey(fileKey.toString())){
+			return this.offsetMap.get(fileKey.toString());
+		}
+		return 0;
 	}
 	
 	public void setOffset(FileUniqueKey fileKey, long offset){
-		this.offsetMap.put(fileKey, offset);
+		this.offsetMap.put(fileKey.toString(), offset);
 	}
 	
 	public void removeFile(FileUniqueKey fileKey){
-		this.offsetMap.remove(fileKey);
+		this.offsetMap.remove(fileKey.toString());
 	}
 	
 	private void initialFromDisk() throws IOException{
@@ -70,27 +71,16 @@ public class SincedbHandler implements Runnable {
 		}
 		this.dataFolder = Paths.get(dataFolderName);
 		if(Files.exists(dataFolder)){
-			if(!Files.isDirectory(dataFolder)){
+			if(Files.isRegularFile(dataFolder)){
 				throw new RuntimeException("sincedb folder is not a valid directory!");
 			}
 		} else {
 			Files.createDirectory(dataFolder);
 		}
 		
-		Optional<Path> dbOpt = Files.list(dataFolder).filter(new Predicate<Path>(){
-			@Override
-			public boolean test(Path input) {
-				return input.getFileName().equals(SINCEDB_FILE_PREFIX + hashKey);
-			}}).findFirst();
-		if(null == dbOpt || !dbOpt.isPresent()){
-			return;
-		}
-		Path sincedbFilepath = dbOpt.get();
-		if(null == sincedbFilepath){
-			return;
-		}
-		if(Files.exists(sincedbFilepath) && Files.isRegularFile(sincedbFilepath)){
-			this.readSincedbFile(sincedbFilepath);
+		Path dataPath = this.joinPath(this.dataFolder, SINCEDB_FILE_PREFIX + this.hashKey);
+		if(Files.exists(dataPath) && Files.isRegularFile(dataPath)){
+			this.readSincedbFile(dataPath);
 		}
 	}
 	
@@ -106,7 +96,7 @@ public class SincedbHandler implements Runnable {
 				continue;
 			}
 			
-			this.offsetMap.put(new FileUniqueKey(strArray[0], strArray[1]), Long.parseLong(strArray[2]));
+			this.offsetMap.put(strArray[0] + "," + strArray[1], Long.parseLong(strArray[2]));
 		}
 	}
 	
@@ -119,8 +109,8 @@ public class SincedbHandler implements Runnable {
 		Path tmpPath = this.joinPath(this.dataFolder, System.currentTimeMillis() + ".tmp");
 		Path dataPath = this.joinPath(this.dataFolder, SINCEDB_FILE_PREFIX + this.hashKey);
 		StringBuffer buffer = new StringBuffer();
-		for(FileUniqueKey fileKey: this.offsetMap.keySet()){
-			buffer.append(fileKey.toString()).append(",").append(this.offsetMap.get(fileKey)).append("\n");
+		for(String key: this.offsetMap.keySet()){
+			buffer.append(key).append(",").append(this.offsetMap.get(key)).append("\n");
 		}
 		try {
 			Files.write(tmpPath, buffer.toString().getBytes());
