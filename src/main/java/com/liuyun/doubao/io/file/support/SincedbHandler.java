@@ -37,6 +37,10 @@ public class SincedbHandler {
 		this.offsetMap.put(fileKey, offset);
 	}
 	
+	public void removeFile(FileUniqueKey fileKey){
+		this.offsetMap.remove(fileKey);
+	}
+	
 	private void initialFromDisk() throws IOException{
 		String dataFolderName = DEFAULT_DATA_FOLDER_NAME;
 		String userDefinedDataFolder = Configuration.getInstance().getProperty("sincedb.path");

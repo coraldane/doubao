@@ -12,6 +12,8 @@ public class SingleFileReader {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	private volatile boolean ready = true;
+	
 	private Path path;
 	private FileUniqueKey fileKey;
 	private SincedbHandler sincedbHandler;
@@ -23,8 +25,14 @@ public class SingleFileReader {
 	}
 
 	public List<JSONObject> read(){
-		logger.info("file unique key:{}, path: {}", this.fileKey, this.path);
+		if(ready){
+			logger.info("file unique key:{}, path: {}", this.fileKey, this.path);
+		}
 		return null;
+	}
+
+	public void setReady(boolean ready) {
+		this.ready = ready;
 	}
 	
 }

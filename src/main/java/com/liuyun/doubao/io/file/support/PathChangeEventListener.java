@@ -16,6 +16,7 @@ public class PathChangeEventListener {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private Map<FileUniqueKey, SingleFileReader> fileReaderMap = null;
+	private Map<Path, FileUniqueKey> fileKeyMap = Maps.newConcurrentMap();
 	private SincedbHandler sincedbHandler = null;
 	
 	public PathChangeEventListener(SincedbHandler handler, Map<FileUniqueKey, SingleFileReader> fileReaderMap){
@@ -30,10 +31,21 @@ public class PathChangeEventListener {
 		FileUniqueKey fileKey = FileUtils.getInodeAndDevice(path);
 		SingleFileReader fileReader = new SingleFileReader(path, fileKey, sincedbHandler);
 		this.fileReaderMap.put(fileKey, fileReader);
+		this.fileKeyMap.put(path, fileKey);
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
 		logger.info("{}: {}", kind.name(), child);
+		if(!this.fileKeyMap.containsKey(child)){
+			return;
+		}
+		
+		FileUniqueKey fileKey = this.fileKeyMap.get(child);
+		if("ENTRY_CREATE".equals(kind.name()) || "ENTRY_MODIFY".equals(kind.name())){
+			this.fileReaderMap.get(fileKey).setReady(true);
+		} else if("ENTRY_DELETE".equals(kind.name())){
+			this.sincedbHandler.removeFile(fileKey);
+		}
 	}
 	
 }
