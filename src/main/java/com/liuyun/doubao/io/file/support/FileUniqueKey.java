@@ -26,8 +26,18 @@ public class FileUniqueKey implements Comparable<FileUniqueKey>{
 	public String toString(){
 		return this.inode + "," + this.device;
 	}
+	
 	@Override
 	public int compareTo(FileUniqueKey o) {
-		return (this.inode + this.device).compareTo(o.getInode() + o.getDevice());
+		return this.toString().compareTo(o.toString());
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof FileUniqueKey){
+			FileUniqueKey fileKey = (FileUniqueKey)o;
+			return this.toString().equals(fileKey.toString());
+		}
+		return false;
 	}
 }

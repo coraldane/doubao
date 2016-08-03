@@ -117,7 +117,7 @@ public class FilePathWatcher implements Runnable {
 		}
 	}
 	
-	private boolean matchPath(Path file){
+	private boolean matchPath(Path file) throws IOException{
 		boolean bAllow = false;
 		for(PathMatcher excludePathMatcher: excludePathMatchers){
 			if(excludePathMatcher.matches(file)){
