@@ -3,6 +3,8 @@ package com.liuyun.doubao.handler;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.InputConfig;
@@ -39,7 +41,7 @@ public class InputEventHandler extends StopableThread {
 			return false;
 		}
 		List<JSONObject> dataList = this.input.read();
-		if(null == dataList){
+		if(CollectionUtils.isEmpty(dataList)){
 			return false;
 		}
 		for (JSONObject json : dataList) {

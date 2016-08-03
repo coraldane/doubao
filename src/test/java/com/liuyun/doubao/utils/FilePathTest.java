@@ -11,7 +11,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import com.alibaba.fastjson.JSON;
-import com.liuyun.doubao.io.file.PathResolver;
+import com.liuyun.doubao.io.file.support.PathResolver;
 
 public class FilePathTest {
 

@@ -14,18 +14,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.io.Input;
+import com.liuyun.doubao.io.file.support.FilePathWatcher;
+import com.liuyun.doubao.io.file.support.FileUniqueKey;
+import com.liuyun.doubao.io.file.support.PathChangeEventListener;
+import com.liuyun.doubao.io.file.support.PathResolver;
+import com.liuyun.doubao.io.file.support.SincedbHandler;
+import com.liuyun.doubao.io.file.support.SingleFileReader;
 import com.liuyun.doubao.utils.StringUtils;
 
 public class FileInput implements Input {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private ExecutorService executor = Executors.newCachedThreadPool();
-	private Map<String, FilePathWatcher> pathWatcherMap = Maps.newConcurrentMap();
+	private ExecutorService pathWatchExecutor = Executors.newCachedThreadPool();
+	
+	private List<FilePathWatcher> pathWatcherList = Lists.newArrayList();
+	private Map<FileUniqueKey, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
 	
 	private FileInputConfig inputConfig = null;
 	
@@ -37,7 +46,7 @@ public class FileInput implements Input {
 			try {
 				this.registerPathWatcher();
 			} catch (IOException e) {
-				logger.error("register path watcher error", e);
+				logger.error("register watcher error", e);
 			}
 		}
 	}
@@ -56,26 +65,34 @@ public class FileInput implements Input {
 				continue;
 			}
 			
-			String pathHash = DigestUtils.md2Hex(filepath);
-			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig.isRecursive());
-			this.pathWatcherMap.put(pathHash, pathWatcher);
-			executor.submit(pathWatcher);
+			String hashKey = DigestUtils.md2Hex(filepath);
+			
+			SincedbHandler sincedbHandler = new SincedbHandler(hashKey);
+			PathChangeEventListener eventListener = new PathChangeEventListener(sincedbHandler, this.fileReaderMap);
+			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig, eventListener);
+			this.pathWatcherList.add(pathWatcher);
+			this.pathWatchExecutor.submit(pathWatcher);
 		}
 	}
 	
 	@Override
 	public void destroy() {
-		this.executor.shutdown();
-		for(String key: this.pathWatcherMap.keySet()){
-			FilePathWatcher pathWatcher = this.pathWatcherMap.get(key);
+		for(FilePathWatcher pathWatcher: this.pathWatcherList){
 			pathWatcher.destroy();
 		}
+		this.pathWatchExecutor.shutdown();
 	}
 
 	@Override
 	public List<JSONObject> read() {
-		// TODO Auto-generated method stub
-		return null;
+		List<JSONObject> dataList = Lists.newArrayList();
+		for(SingleFileReader fileReader: this.fileReaderMap.values()){
+			List<JSONObject> itemList = fileReader.read();
+			if(null != itemList){
+				dataList.addAll(itemList);
+			}
+		}
+		return dataList;
 	}
 
 }
