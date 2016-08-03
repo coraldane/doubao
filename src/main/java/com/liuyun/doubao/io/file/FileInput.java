@@ -67,7 +67,7 @@ public class FileInput implements Input {
 			
 			String hashKey = DigestUtils.md2Hex(filepath);
 			
-			SincedbHandler sincedbHandler = new SincedbHandler(hashKey);
+			SincedbHandler sincedbHandler = new SincedbHandler(hashKey, inputConfig);
 			PathChangeEventListener eventListener = new PathChangeEventListener(sincedbHandler, this.fileReaderMap);
 			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig, eventListener);
 			this.pathWatcherList.add(pathWatcher);
@@ -81,15 +81,24 @@ public class FileInput implements Input {
 			pathWatcher.destroy();
 		}
 		this.pathWatchExecutor.shutdown();
+		
+		//close file channel
+		for(SingleFileReader fileReader: this.fileReaderMap.values()){
+			fileReader.destroy();
+		}
 	}
 
 	@Override
 	public List<JSONObject> read() {
 		List<JSONObject> dataList = Lists.newArrayList();
 		for(SingleFileReader fileReader: this.fileReaderMap.values()){
-			List<JSONObject> itemList = fileReader.read();
-			if(null != itemList){
-				dataList.addAll(itemList);
+			try {
+				List<JSONObject> itemList = fileReader.read();
+				if(null != itemList){
+					dataList.addAll(itemList);
+				}
+			} catch (IOException e) {
+//				e.printStackTrace();
 			}
 		}
 		return dataList;

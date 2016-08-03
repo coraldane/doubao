@@ -35,7 +35,6 @@ public class PathChangeEventListener {
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
-		logger.info("{}: {}", kind.name(), child);
 		if(!this.fileKeyMap.containsKey(child)){
 			return;
 		}
@@ -45,6 +44,7 @@ public class PathChangeEventListener {
 			this.fileReaderMap.get(fileKey).setReady(true);
 		} else if("ENTRY_DELETE".equals(kind.name())){
 			this.sincedbHandler.removeFile(fileKey);
+			this.fileReaderMap.get(fileKey).destroy();
 		}
 	}
 	

@@ -5,7 +5,7 @@
 			"recursive": true,
 			"exclude": ["*.gz"],
 			"type": "cyberlocker",
-			"start_position": "beginning"
+			"start_position": "end"
 		}
 	},
 	"filter": [

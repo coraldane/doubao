@@ -16,7 +16,6 @@ public class FileInputConfig extends AbstractInputConfig {
 
 	private String[] path;
 	private String[] exclude;
-	private String delimiter = "\n";
 	private boolean recursive = false;
 	
 	private Map<String, String> tags = Maps.newConcurrentMap();
@@ -42,14 +41,6 @@ public class FileInputConfig extends AbstractInputConfig {
 
 	public void setExclude(String[] exclude) {
 		this.exclude = exclude;
-	}
-
-	public String getDelimiter() {
-		return delimiter;
-	}
-
-	public void setDelimiter(String delimiter) {
-		this.delimiter = delimiter;
 	}
 
 	public Map<String, String> getTags() {

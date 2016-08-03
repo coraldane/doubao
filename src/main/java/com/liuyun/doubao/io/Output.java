@@ -1,6 +1,8 @@
 package com.liuyun.doubao.io;
 
-import com.alibaba.fastjson.JSONArray;
+import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.OutputConfig;
 import com.liuyun.doubao.extension.SPI;
 
@@ -14,5 +16,5 @@ public interface Output extends Closable {
 	 * @param dataArray
 	 * @return 成功的记录数
 	 */
-	int write(JSONArray dataArray);
+	int write(List<JSONObject> dataArray);
 }

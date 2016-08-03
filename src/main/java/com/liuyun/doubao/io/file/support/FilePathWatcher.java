@@ -20,11 +20,13 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
 
 public class FilePathWatcher implements Runnable {
@@ -34,6 +36,7 @@ public class FilePathWatcher implements Runnable {
 	private final WatchService watcher;
 	private final Map<WatchKey, Path> keys;
 	private final PathMatcher pathMatcher;
+	private final List<PathMatcher> excludePathMatchers = Lists.newArrayList();
 	
 	private PathChangeEventListener eventListener = null;
 	private FileInputConfig fileInputConfig = null;
@@ -42,11 +45,19 @@ public class FilePathWatcher implements Runnable {
 			PathChangeEventListener eventListener) throws IOException {
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+		
 		this.keys = new HashMap<WatchKey, Path>();
 		this.fileInputConfig = inputConfig;
 		this.eventListener = eventListener;
 
 		final Path topDir = path;
+		
+		if(null != this.fileInputConfig.getExclude()){
+			for(String exclude: this.fileInputConfig.getExclude()){
+				this.excludePathMatchers.add(FileSystems.getDefault().getPathMatcher("glob:" + exclude));
+			}
+		}
+		
 		this.initMatcher(topDir, glob, this.fileInputConfig.isRecursive());
 
 		if (this.fileInputConfig.isRecursive()) {
@@ -68,7 +79,7 @@ public class FilePathWatcher implements Runnable {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if (pathMatcher.matches(file)) {
+				if(matchPath(file)){
 					eventListener.addFileReader(file);
 				}
 				return FileVisitResult.CONTINUE;
@@ -104,6 +115,19 @@ public class FilePathWatcher implements Runnable {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	private boolean matchPath(Path file){
+		boolean bAllow = false;
+		for(PathMatcher excludePathMatcher: excludePathMatchers){
+			if(excludePathMatcher.matches(file)){
+				return false;
+			}
+		}
+		if (pathMatcher.matches(file)) {
+			bAllow = true;
+		}
+		return bAllow;
 	}
 
 	/**
@@ -145,7 +169,7 @@ public class FilePathWatcher implements Runnable {
 					try {
 						if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
 							registerAll(child);
-						} else if (pathMatcher.matches(child)) {
+						} else if (matchPath(child)) {
 							eventListener.addFileReader(child);
 						}
 					} catch (IOException x) {

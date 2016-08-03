@@ -1,11 +1,15 @@
 package com.liuyun.doubao.handler;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.liuyun.doubao.ctx.JsonEvent;
 import com.liuyun.doubao.io.Output;
+import com.liuyun.doubao.utils.SysUtils;
 import com.lmax.disruptor.EventHandler;
 
 public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
@@ -16,7 +20,7 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 	
 	private long lastWriteTime = System.currentTimeMillis();
 	
-	private JSONArray dataBuffer = new JSONArray();
+	private List<JSONObject> dataBuffer = Lists.newArrayList();
 	
 	public OutputEventHandler(Output output, int batchSize){
 		this.output = output;
@@ -33,8 +37,8 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 
 	@Override
 	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
-		if(this.dataBuffer.size() >= this.batchSize){
-			throw new RuntimeException("wait for write data...");
+		while(this.dataBuffer.size() >= this.batchSize){
+			SysUtils.sleep(100);
 		}
 		
 		this.dataBuffer.add(event.get());
@@ -43,7 +47,7 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 	@Override
 	public void run(){
 		while(true){
-			if(this.dataBuffer.size() == this.batchSize || lastWriteTime +1000 < System.currentTimeMillis()){
+			if(this.dataBuffer.size() >= this.batchSize || lastWriteTime +1000 < System.currentTimeMillis()){
 				this.output.write(this.dataBuffer);
 				this.dataBuffer.clear();
 				

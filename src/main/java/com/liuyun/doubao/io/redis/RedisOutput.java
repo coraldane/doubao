@@ -1,9 +1,10 @@
 package com.liuyun.doubao.io.redis;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.OutputConfig;
 import com.liuyun.doubao.config.redis.RedisOutputConfig;
@@ -37,12 +38,12 @@ public class RedisOutput implements Output {
 	}
 	
 	@Override
-	public int write(JSONArray dataArray) {
+	public int write(List<JSONObject> dataArray) {
 		ShardedJedis jedis = this.jedisService.getJedis();
 		int success = 0;
 		
 		for(int index=0; index < dataArray.size(); index++){
-			JSONObject data = dataArray.getJSONObject(index);
+			JSONObject data = dataArray.get(index);
 			if(null == data){
 				continue;
 			}

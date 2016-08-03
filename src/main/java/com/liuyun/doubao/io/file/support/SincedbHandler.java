@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.common.Configuration;
+import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.utils.StringUtils;
 
 public class SincedbHandler {
@@ -20,15 +21,21 @@ public class SincedbHandler {
 	private static final String SINCEDB_DATA_DELIMITER = ",";
 	
 	private String hashKey = null;
+	private FileInputConfig fileInputConfig = null;
 	
 	private Path dataFolder = null;
 	private Map<FileUniqueKey, Long> offsetMap = Maps.newConcurrentMap();
 
-	public SincedbHandler(String hash) throws IOException{
+	public SincedbHandler(String hash, FileInputConfig inputConfig) throws IOException{
 		this.hashKey = hash;
+		this.fileInputConfig = inputConfig;
 		this.initialFromDisk();
 	}
 	
+	public FileInputConfig getFileInputConfig() {
+		return fileInputConfig;
+	}
+
 	public Long getOffset(FileUniqueKey fileKey){
 		return this.offsetMap.get(fileKey);
 	}
