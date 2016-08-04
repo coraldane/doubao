@@ -77,7 +77,7 @@ public class SingleFileReader {
 		if(CollectionUtils.isNotEmpty(strLineList)){
 			for(String strLine: strLineList){
 				JSONObject json = new JSONObject();
-				json.put("@timestamp", DateUtils.formatNow(DateUtils.DATE_FORMAT_DEFAULT));
+				json.put("@timestamp", DateUtils.formatNow(DateUtils.DATE_FORMAT_ISO8601));
 				json.put("host", this.messageBean.getHost());
 				json.put("path", this.messageBean.getPath());
 				json.put("message", strLine);

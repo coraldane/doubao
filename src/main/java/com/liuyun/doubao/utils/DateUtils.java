@@ -6,18 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
- * 
- * @Date: 2014年3月10日 下午9:44:31<br>
- * @Copyright (c) 2014 udai.com <br> * 
- * @since 1.0
- * @author coral
- */
 public class DateUtils extends org.apache.commons.lang.time.DateUtils{
 	
 	public static final String DATE_FORMAT_YEAR_MONTH_DAY = "yyyy-MM-dd";
 	public static final String DATE_FORMAT_HOUR_MINUTE_SECOND = "HH:mm:ss";
 	public static final String DATE_FORMAT_DEFAULT = "yyyy-MM-dd HH:mm:ss";
+	public static final String DATE_FORMAT_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	
 	public static final String DATE_FORMAT_SIMPLE = "yyyyMMddHHmmss";
 	

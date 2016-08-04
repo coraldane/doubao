@@ -165,17 +165,7 @@ public class FilePathWatcher implements Runnable {
 				
 				// if directory is created, and watching recursively, then
 				// register it and its sub-directories
-				if (this.fileInputConfig.isRecursive() && (kind == ENTRY_CREATE)) {
-					try {
-						if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-							registerAll(child);
-						} else if (matchPath(child)) {
-							eventListener.addFileReader(child);
-						}
-					} catch (IOException x) {
-						// ignore to keep sample readbale
-					}
-				}
+				this.registerSubDirectories(kind, child);
 				
 				this.eventListener.handleEvent(event.kind(), child);
 			}
@@ -189,6 +179,20 @@ public class FilePathWatcher implements Runnable {
 				if (keys.isEmpty()) {
 					break;
 				}
+			}
+		}
+	}
+	
+	private void registerSubDirectories(WatchEvent.Kind<?> kind, Path child){
+		if (this.fileInputConfig.isRecursive() && (kind == ENTRY_CREATE)) {
+			try {
+				if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
+					registerAll(child);
+				} else if (matchPath(child)) {
+					eventListener.addFileReader(child);
+				}
+			} catch (IOException x) {
+				// ignore to keep sample readbale
 			}
 		}
 	}
