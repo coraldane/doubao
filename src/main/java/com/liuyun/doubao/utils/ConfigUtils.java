@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.liuyun.doubao.config.DoubaoConfig;
 import com.liuyun.doubao.config.parser.FilterConfigParser;
 import com.liuyun.doubao.config.parser.InputConfigParser;
@@ -29,7 +30,7 @@ public class ConfigUtils {
 				return;
 			}
 			String strJson = IOUtils.toString(fileReader);
-			JSONObject configJson = JSON.parseObject(strJson);
+			JSONObject configJson = JSON.parseObject(strJson, Feature.OrderedField);
 			parseConfig(configJson);
 		} catch (Exception e) {
 			logger.error("read config file error.", e);

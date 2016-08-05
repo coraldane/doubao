@@ -1,5 +1,7 @@
 package com.liuyun.doubao.filter;
 
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,13 +35,16 @@ public class GrokFilter extends DefaultFilter {
 			Match gm = grok.match(strMsg);
 			gm.captures();
 			
+			Map<String, Object> rowMap = gm.toMap();
+			if(rowMap.isEmpty()){
+				logger.error("grokparsefailure: {}", strMsg);
+				Context.addTag2Data(data, "_grokparsefailure");
+			}
 			data.putAll(gm.toMap());
-			
-			return true;
 		} catch (GrokException e) {
-			Context.addTag2Data(data, "_grokparsefailure");
+			logger.error("grokparsefailure", e);
 		}
-		return false;
+		return true;
 	}
 	
 	@Override

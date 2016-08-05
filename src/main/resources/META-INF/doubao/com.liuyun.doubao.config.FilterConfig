@@ -2,3 +2,4 @@ default=com.liuyun.doubao.config.filter.DefaultFilterConfig
 match=com.liuyun.doubao.config.filter.MatchFilterConfig
 regex=com.liuyun.doubao.config.filter.RegexFilterConfig
 grok=com.liuyun.doubao.config.filter.GrokFilterConfig
+contains=com.liuyun.doubao.config.filter.ContainsFilterConfig

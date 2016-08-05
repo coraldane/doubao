@@ -20,6 +20,13 @@
 				},
 				"remove_fields": ["message"]
 			},
+			"contains": {
+				"field_name": "tags",
+				"contains_value": "_grokparsefailure",
+				"drop": true
+			}
+		},
+		{
 			"match": {
 				"pattern": {
 					"method_name": "/saveCyberlockerData"
