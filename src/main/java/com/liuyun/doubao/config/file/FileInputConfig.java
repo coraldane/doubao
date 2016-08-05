@@ -1,9 +1,9 @@
 package com.liuyun.doubao.config.file;
 
-import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.liuyun.doubao.common.Identified;
 import com.liuyun.doubao.config.AbstractInputConfig;
 import com.liuyun.doubao.config.CodecConfig;
@@ -18,7 +18,7 @@ public class FileInputConfig extends AbstractInputConfig {
 	private String[] exclude;
 	private boolean recursive = false;
 	
-	private Map<String, String> tags = Maps.newConcurrentMap();
+	private Set<String> tags = Sets.newHashSet();
 	private String type = null;
 	
 	//one of ["beginning", "end"]
@@ -42,12 +42,12 @@ public class FileInputConfig extends AbstractInputConfig {
 	public void setExclude(String[] exclude) {
 		this.exclude = exclude;
 	}
-
-	public Map<String, String> getTags() {
+	
+	public Set<String> getTags() {
 		return tags;
 	}
 
-	public void setTags(Map<String, String> tags) {
+	public void setTags(Set<String> tags) {
 		this.tags = tags;
 	}
 

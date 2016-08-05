@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.1.37</version>
+			<version>1.1.36</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -50,6 +50,12 @@
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
 			<version>3.3.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.nflabs</groupId>
+			<artifactId>grok</artifactId>
+			<version>0.0.6</version>
 		</dependency>
 
 		<dependency>
@@ -148,8 +154,16 @@
 
 	<repositories>
 		<repository>
-			<id>mixuan</id>
-			<url>http://udai.com:8081/nexus/content/groups/public</url>
+			<id>thirdparty</id>
+			<url>http://udai.com:8099/repository/maven-releases/</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>thirdparty</id>
+			<name>LiuTian private Repository</name>
+			<url>http://udai.com:8099/repository/maven-releases/</url>
+		</repository>
+	</distributionManagement>
 </project>

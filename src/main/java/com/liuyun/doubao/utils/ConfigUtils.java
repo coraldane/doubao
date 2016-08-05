@@ -49,17 +49,18 @@ public class ConfigUtils {
 		config = new DoubaoConfig();
 		String[] keys = new String[]{"input", "filter", "output"};
 		for(String key: keys){
-			if(configJson.containsKey(key)){
-				if("input".equals(key)){
-					JSONObject inputJson = configJson.getJSONObject(key);
-					config.setInput(InputConfigParser.doParse(inputJson));
-				} else if("output".equals(key)){
-					JSONObject outputJson = configJson.getJSONObject(key);
-					config.setOutputs(OutputConfigParser.doParse(outputJson));
-				} else if("filter".equals(key)){
-					JSONArray filterJson = configJson.getJSONArray(key);
-					config.setFilters(FilterConfigParser.doParse(filterJson));
-				}
+			if(!configJson.containsKey(key)){
+				continue;
+			}
+			if("input".equals(key)){
+				JSONObject inputJson = configJson.getJSONObject(key);
+				config.setInput(InputConfigParser.doParse(inputJson));
+			} else if("output".equals(key)){
+				JSONObject outputJson = configJson.getJSONObject(key);
+				config.setOutputs(OutputConfigParser.doParse(outputJson));
+			} else if("filter".equals(key)){
+				JSONArray filterJson = configJson.getJSONArray(key);
+				config.setFilters(FilterConfigParser.doParse(filterJson));
 			}
 		}
 	}

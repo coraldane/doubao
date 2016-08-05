@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.PluginConfig;
 import com.liuyun.doubao.config.redis.RedisConfig;
+import com.liuyun.doubao.io.FilterResult;
 import com.liuyun.doubao.plugin.DefaultPlugin;
 import com.liuyun.doubao.service.JedisService;
 import com.liuyun.doubao.utils.StringUtils;
@@ -40,14 +41,14 @@ public class TaskResultPlugin extends DefaultPlugin {
 	}
 
 	@Override
-	public boolean filter(JSONObject data) {
+	public FilterResult filter(JSONObject data) {
 		data.remove("hostname");
 		data.remove("message");
 		
 		String loggerIndex = data.getString("logger_index");
 		if(StringUtils.isNotBlank(loggerIndex)){
 			if(false == this.dealWithPartResult(loggerIndex, data)){
-				return false;
+				return FilterResult.newDrop();
 			}
 		} else {
 			String taskMessage = data.getString("task_message");
@@ -59,7 +60,7 @@ public class TaskResultPlugin extends DefaultPlugin {
 			}
 		}
 		
-		return true;
+		return FilterResult.newMatched(true);
 	}
 	
 	private boolean dealWithPartResult(String loggerIndex, JSONObject data){

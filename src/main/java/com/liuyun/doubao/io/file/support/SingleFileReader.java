@@ -74,12 +74,20 @@ public class SingleFileReader {
 		} else {
 			return null;
 		}
+		
 		if(CollectionUtils.isNotEmpty(strLineList)){
+			FileInputConfig fileInputConfig = this.sincedbHandler.getFileInputConfig();
 			for(String strLine: strLineList){
 				JSONObject json = new JSONObject();
 				json.put("@timestamp", DateUtils.formatNow(DateUtils.DATE_FORMAT_ISO8601));
 				json.put("host", this.messageBean.getHost());
 				json.put("path", this.messageBean.getPath());
+				if(StringUtils.isNotEmpty(fileInputConfig.getType())){
+					json.put("type", fileInputConfig.getType());
+				}
+				if(!fileInputConfig.getTags().isEmpty()){
+					json.put("tags", fileInputConfig.getTags());
+				}
 				json.put("message", strLine);
 				retList.add(json);
 			}

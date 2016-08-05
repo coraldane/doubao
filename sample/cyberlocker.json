@@ -10,6 +10,16 @@
 	},
 	"filter": [
 		{
+			"grok": {
+				"match": {
+					"field_name": "message",
+					"pattern": "\\[%{TIMESTAMP_ISO8601:time_local}\\] %{LOGLEVEL:log_level} - %{GREEDYDATA:class_name}\\(%{GREEDYDATA:file_name}:%{NUMBER:file_pos}\\)(?<logger_message>.*)"
+				},
+				"add_field": {
+					"name": "value"
+				},
+				"remove_fields": ["message"]
+			},
 			"match": {
 				"pattern": {
 					"method_name": "/saveCyberlockerData"

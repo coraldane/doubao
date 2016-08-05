@@ -8,7 +8,7 @@ public class DoubaoConfig {
 
 	private InputConfig input;
 	private List<OutputConfig> outputs = Lists.newArrayList();
-	private List<FilterConfig> filters = Lists.newArrayList();
+	private List<List<FilterConfig>> filters = Lists.newArrayList();
 	
 	public InputConfig getInput() {
 		return input;
@@ -22,10 +22,10 @@ public class DoubaoConfig {
 	public void setOutputs(List<OutputConfig> outputs) {
 		this.outputs = outputs;
 	}
-	public List<FilterConfig> getFilters() {
+	public List<List<FilterConfig>> getFilters() {
 		return filters;
 	}
-	public void setFilters(List<FilterConfig> filters) {
+	public void setFilters(List<List<FilterConfig>> filters) {
 		this.filters = filters;
 	}
 	

@@ -1,5 +1,7 @@
 package com.liuyun.doubao.filter;
 
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import com.liuyun.doubao.config.FilterConfig;
 import com.liuyun.doubao.config.filter.DefaultFilterConfig;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Filter;
+import com.liuyun.doubao.io.FilterResult;
 
 public abstract class DefaultFilter implements Filter {
 	
@@ -43,17 +46,27 @@ public abstract class DefaultFilter implements Filter {
 	}
 
 	@Override
-	public boolean doMatch(JSONObject data) {
+	public FilterResult doMatch(JSONObject data) {
 		if(false == this.doFilter(data)){//如果不符合匹配规则，直接进入下一过滤器
-			return true;
+			return FilterResult.newNotMatch();
 		}
 		if(this.getFilterConfig().isDrop()){//直接丢弃
-			return false;
+			return FilterResult.newDrop();
 		}
+		
+		Map<String, Object> addedFieldMap = this.getFilterConfig().getAddedFieldMap();
+		for(String field: addedFieldMap.keySet()){
+			data.put(field, addedFieldMap.get(field));
+		}
+		
+		for(String fieldName: this.getFilterConfig().getRemoveFields()){
+			data.remove(fieldName);
+		}
+		
 		if(StringUtils.isNotEmpty(this.getFilterConfig().getPluginName()) && null != this.plugin){
 			return this.plugin.filter(data);
 		}
-		return true;
+		return FilterResult.newNotMatch();
 	}
 	
 	public abstract void setFilterConfig(DefaultFilterConfig filterConfig);

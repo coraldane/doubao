@@ -13,18 +13,22 @@ import com.liuyun.doubao.extension.ExtensionLoader;
 public class FilterConfigParser {
 	private static final ExtensionLoader<FilterConfig> loader = ExtensionLoader.getExtensionLoader(FilterConfig.class);
 	
-	public static List<FilterConfig> doParse(JSONArray filterJson){
-		List<FilterConfig> retList = Lists.newArrayList();
+	public static List<List<FilterConfig>> doParse(JSONArray filterJson){
+		List<List<FilterConfig>> retList = Lists.newArrayList();
 		Set<String> configExtensionNames = loader.getSupportedExtensions();
 		for(int index=0; index < filterJson.size(); index++){
 			JSONObject json = filterJson.getJSONObject(index);
+			List<FilterConfig> filterConfigList = Lists.newArrayList();
 			for(String key: json.keySet()){
 				if(!configExtensionNames.contains(key)){
 					continue;
 				}
 				String strJson = json.getString(key);
 				FilterConfig filterConfig = JSON.parseObject(strJson, loader.getExtension(key).getClass());
-				retList.add(filterConfig);
+				filterConfigList.add(filterConfig);
+			}
+			if(!filterConfigList.isEmpty()){
+				retList.add(filterConfigList);
 			}
 		}
 		return retList;
