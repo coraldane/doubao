@@ -4,7 +4,6 @@ public class TaskInfo {
 
 	private long task_id;
 	private Video video;
-	private int download_flow_rate;
 	private int error_code;
 	private String error_extra_info;
 	
@@ -19,12 +18,6 @@ public class TaskInfo {
 	}
 	public void setVideo(Video video) {
 		this.video = video;
-	}
-	public int getDownload_flow_rate() {
-		return download_flow_rate;
-	}
-	public void setDownload_flow_rate(int download_flow_rate) {
-		this.download_flow_rate = download_flow_rate;
 	}
 	public int getError_code() {
 		return error_code;

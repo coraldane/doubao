@@ -8,6 +8,7 @@ import com.liuyun.doubao.chnl.Channel;
 import com.liuyun.doubao.config.DoubaoConfig;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.utils.ConfigUtils;
+import com.liuyun.doubao.utils.SysUtils;
 
 public class Server {
 
@@ -43,6 +44,7 @@ public class Server {
 			
 			channel.start();
 			logger.info(channel.getClass().getSimpleName() + " started.");
+			logger.info("current process id:{}", SysUtils.getProcessId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error(e.getMessage(), e);

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liuyun.doubao.config.redis.RedisConfig;
+import com.liuyun.doubao.utils.SysUtils;
 
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
@@ -60,11 +61,7 @@ public class JedisService {
 				enabled = false;
 			} catch(Exception e){
 				logger.info("The redis connection is not successful,wait " + REDIS_TIMEOUT + "ms try again.");
-				try {
-					wait(REDIS_TIMEOUT);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
+				SysUtils.sleep(REDIS_TIMEOUT);
 			}
 		}
 		return jedis;

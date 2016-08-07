@@ -49,6 +49,11 @@
 	],
 	"output": {
 		"stdout": {
+		},
+		"redis": {
+			"host": "udai.com",
+			"passwd": "redis@udai",
+			"key": "logstash-doubao-test"
 		}
 	}
 }
