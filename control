@@ -5,6 +5,7 @@ cd $WORKSPACE
 
 conf_file=$2
 app=doubao
+version=1.0.0
 
 mkdir -p data logs
 
@@ -30,7 +31,7 @@ function start() {
         cat $pidfile
         return 1
     fi
-    java -jar doubao-1.0.0-standalone.jar conf/$conf_file.json &> $logfile &
+    java -Dlog4j.configuration=file://${WORKSPACE}/conf/log4j.xml -jar doubao-1.0.0-standalone.jar conf/$conf_file.json &> $logfile &
     echo $! > $pidfile
     echo "$app started..."
 }
@@ -61,12 +62,22 @@ function tailf() {
     tail -f $logfile
 }
 
-function help() {
-    echo "USAGE: $0 [1]:start|stop|restart|status|tail"
-    echo "[2]:  config file name under conf folder   e.g.: $1 taisan" 
+function pack() {
+    cd target
+    mkdir -p $app-releases
+    cp -r $app-$version-standalone.jar ../conf ../control $app-releases/
+    file_list="$app-releases"
+    echo "...tar $app-$version.tar.gz <= $file_list"
+    tar zcvf $app-$version.tar.gz $file_list
+    rm -rf $app-releases
 }
 
-if [ $# != 2 ] ; then 
+function help() {
+    echo "USAGE: $0 [1]:start|stop|restart|status|tail"
+    echo "[2]:  config file name under conf folder   e.g.: $1 taisan"
+}
+
+if [ $# != 2 ] ; then
     help
 elif [ "$1" == "stop" ];then
     stop
@@ -76,6 +87,8 @@ elif [ "$1" == "restart" ];then
     restart
 elif [ "$1" == "status" ];then
     status
+elif [ "$1" == "pack" ];then
+    pack
 elif [ "$1" == "tail" ];then
     tailf
 else

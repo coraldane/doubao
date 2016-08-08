@@ -1,6 +1,7 @@
 package com.liuyun.doubao.io.file.support;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,20 +86,34 @@ public class SincedbHandler implements Runnable {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void readSincedbFile(Path sincedbFilepath) throws IOException {
-		List<String> strLineList = Files.readAllLines(sincedbFilepath);
-		for(String strLine: strLineList){
-			if(StringUtils.isBlank(strLine)){
-				continue;
+		FileReader fileReader = null;
+		
+		try{
+			fileReader = new FileReader(sincedbFilepath.toFile());
+			List<String> strLineList = IOUtils.readLines(fileReader);
+			for(String strLine: strLineList){
+				if(StringUtils.isBlank(strLine)){
+					continue;
+				}
+				
+				String[] strArray = strLine.trim().split(SINCEDB_DATA_DELIMITER);
+				if(null == strArray || 3 != strArray.length || !StringUtils.isInteger(strArray[2])){
+					continue;
+				}
+				
+				this.offsetMap.put(strArray[0] + "," + strArray[1], Long.parseLong(strArray[2]));
 			}
-			
-			String[] strArray = strLine.trim().split(SINCEDB_DATA_DELIMITER);
-			if(null == strArray || 3 != strArray.length || !StringUtils.isInteger(strArray[2])){
-				continue;
+		} catch(IOException e){
+			logger.error("read sincedb file error", e);
+		} finally {
+			if(null != fileReader){
+				fileReader.close();
+				fileReader = null;
 			}
-			
-			this.offsetMap.put(strArray[0] + "," + strArray[1], Long.parseLong(strArray[2]));
 		}
+		
 	}
 	
 	@Override

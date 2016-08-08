@@ -1,11 +1,8 @@
 {
 	"input": {
 		"file": {
-			"path": ["/opt/deploy/logs/**.log"],
-			"recursive": true,
-			"exclude": ["*.gz"],
-			"type": "cyberlocker",
-			"start_position": "end"
+			"path": ["/opt/Cyberlocker3/cyberlocker/logs/cyberlocker.log"],
+			"type": "cyberlocker"
 		}
 	},
 	"filter": [
@@ -13,10 +10,7 @@
 			"grok": {
 				"match": {
 					"field_name": "message",
-					"pattern": "\\[%{TIMESTAMP_ISO8601:time_local}\\] %{LOGLEVEL:log_level} - %{GREEDYDATA:class_name}\\(%{GREEDYDATA:file_name}:%{NUMBER:file_pos}\\)(?<logger_message>.*)"
-				},
-				"add_field": {
-					"name": "value"
+					"pattern": "%{TIMESTAMP_ISO8601:time_local} (.*) - %{DATA:method_name} %{LOGLEVEL:log_level}  \\(%{GREEDYDATA:file_name}:%{NUMBER:file_pos}\\) - request string: (?<logger_message>.*)"
 				},
 				"remove_fields": ["message"]
 			},
@@ -48,12 +42,10 @@
 		}
 	],
 	"output": {
-		"stdout": {
-		},
 		"redis": {
-			"host": "udai.com",
-			"passwd": "redis@udai",
-			"key": "logstash-doubao-test"
+			"host": "elastic.ops.vobile.org",
+			"passwd": "Risdoav9",
+			"key": "logstash-cyberlocker-dest"
 		}
 	}
 }

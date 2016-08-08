@@ -44,7 +44,7 @@ public class PathChangeEventListener {
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
-//		logger.info("kind:{}, path: {}", kind.name(), child.toString());
+		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child)){
 			return;
 		}
