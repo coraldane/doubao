@@ -47,16 +47,14 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 	@Override
 	public void run(){
 		while(true){
-			if(this.dataBuffer.size() >= this.batchSize || lastWriteTime +1000 < System.currentTimeMillis()){
+			if(!this.dataBuffer.isEmpty() && 
+					(this.dataBuffer.size() >= this.batchSize || lastWriteTime +1000 < System.currentTimeMillis())){
 				this.output.write(this.dataBuffer);
 				this.dataBuffer.clear();
 				
 				lastWriteTime = System.currentTimeMillis();
 			} else {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}
+				SysUtils.sleep(100);
 			}
 		}
 	}

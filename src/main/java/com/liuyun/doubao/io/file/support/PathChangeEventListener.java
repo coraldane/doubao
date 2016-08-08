@@ -29,12 +29,22 @@ public class PathChangeEventListener {
 			this.fileReaderMap = Maps.newConcurrentMap();
 		}
 		FileUniqueKey fileKey = FileUtils.getInodeAndDevice(path);
-		SingleFileReader fileReader = new SingleFileReader(path, fileKey, sincedbHandler);
-		this.fileReaderMap.put(fileKey, fileReader);
-		this.fileKeyMap.put(path, fileKey);
+		if(this.fileReaderMap.containsKey(fileKey)){//文件重命名
+			for(Path p: this.fileKeyMap.keySet()){
+				if(fileKey.equals(this.fileKeyMap.get(p))){
+					this.fileKeyMap.remove(p);
+				}
+			}
+			this.fileKeyMap.put(path, fileKey);
+		} else {
+			SingleFileReader fileReader = new SingleFileReader(path, fileKey, sincedbHandler);
+			this.fileReaderMap.put(fileKey, fileReader);
+			this.fileKeyMap.put(path, fileKey);
+		}
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
+//		logger.info("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child)){
 			return;
 		}
