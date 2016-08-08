@@ -70,7 +70,7 @@ public class FileInput implements Input {
 			
 			SincedbHandler sincedbHandler = new SincedbHandler(hashKey, inputConfig);
 			PathChangeEventListener eventListener = new PathChangeEventListener(sincedbHandler, this.fileReaderMap);
-			FilePathWatcher pathWatcher = new FilePathWatcher(start, resolver.getGlob(), this.inputConfig, eventListener);
+			FilePathWatcher pathWatcher = new FilePathWatcher(start, filepath, this.inputConfig, eventListener);
 			
 			this.pathWatcherList.add(pathWatcher);
 			this.sincedbHandlerMap.put(hashKey, sincedbHandler);

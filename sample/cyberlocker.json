@@ -42,6 +42,7 @@
 		}
 	],
 	"output": {
+		"stdout": {},
 		"redis": {
 			"host": "elastic.ops.vobile.org",
 			"passwd": "Risdoav9",
