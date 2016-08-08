@@ -98,10 +98,10 @@ public class FilePathWatcher implements Runnable {
 						get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH());
 		Path prev = keys.get(key);
 		if (prev == null) {
-			logger.debug("register: {}", dir);
+			logger.debug("register folder: {}", dir);
 		} else {
 			if (!dir.equals(prev)) {
-				logger.debug("update: {} -> {}", prev, dir);
+				logger.debug("update folder: {} -> {}", prev, dir);
 			}
 		}
 		keys.put(key, dir);

@@ -25,6 +25,7 @@ public class PathChangeEventListener {
 	}
 	
 	public void addFileReader(Path path) throws IOException {
+		logger.debug("register file: {}", path.toString());
 		if(null == this.fileReaderMap){
 			this.fileReaderMap = Maps.newConcurrentMap();
 		}
