@@ -1,8 +1,9 @@
 {
 	"input": {
 		"file": {
-			"path": ["/opt/Cyberlocker3/cyberlocker/logs/cyberlocker.log"],
-			"type": "cyberlocker"
+			"path": ["/opt/deploy/logs/cyberlocker.log"],
+			"type": "cyberlocker",
+			"start_position": "beginning"
 		}
 	},
 	"filter": [
@@ -44,8 +45,8 @@
 	"output": {
 		"stdout": {},
 		"redis": {
-			"host": "elastic.ops.vobile.org",
-			"passwd": "Risdoav9",
+			"host": "udai.com",
+			"passwd": "redis@udai",
 			"key": "logstash-cyberlocker-dest"
 		}
 	}

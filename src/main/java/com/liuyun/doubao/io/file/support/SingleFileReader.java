@@ -1,8 +1,11 @@
 package com.liuyun.doubao.io.file.support;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -19,13 +22,13 @@ import com.liuyun.doubao.utils.SysUtils;
 public class SingleFileReader {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private static final int MAX_READ_LINES_PER_TIME = 10000;
+	private static final int MAX_READ_LINES_PER_TIME = 100;
 	
 	private volatile boolean ready = true;
 	private volatile boolean waitForReading = true;
 	private volatile long lastOffset = 0L;
 	
-	private RandomAccessFile fileHandler = null;
+	private SeekableByteChannel fileHandler = null;
 	private FileUniqueKey fileKey;
 	private SincedbHandler sincedbHandler;
 	
@@ -34,7 +37,7 @@ public class SingleFileReader {
 	public SingleFileReader(Path path, FileUniqueKey fileKey, SincedbHandler sincedbHandler) throws IOException {
 		this.fileKey = fileKey;
 		this.sincedbHandler = sincedbHandler;
-		this.fileHandler = new RandomAccessFile(path.toFile(), "r");
+		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
 		this.messageBean.setPath(path.toString());
 		
 		this.init();
@@ -48,7 +51,7 @@ public class SingleFileReader {
 			long offset = 0;
 			if("end".equals(inputConfig.getStartPosition())){
 				if(0 == this.sincedbHandler.getOffset(this.fileKey)){
-					offset = this.fileHandler.length();
+					offset = this.fileHandler.size();
 				} else {
 					offset = this.sincedbHandler.getOffset(this.fileKey);
 				}
@@ -64,13 +67,13 @@ public class SingleFileReader {
 		List<String> strLineList = null;
 		if(ready){
 			this.setReady(false);
-			long lastOffset = this.sincedbHandler.getOffset(this.fileKey);
-			long newOffset = this.fileHandler.length();
+			this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
+			long newOffset = this.fileHandler.size();
 			
-			strLineList = this.readLines(lastOffset, newOffset);
+			strLineList = this.readLines(newOffset);
 		} else if(waitForReading){
 			long newOffset = this.sincedbHandler.getOffset(this.fileKey);
-			strLineList = this.readLines(this.lastOffset, newOffset);
+			strLineList = this.readLines(newOffset);
 		} else {
 			return null;
 		}
@@ -95,17 +98,16 @@ public class SingleFileReader {
 		return retList;
 	}
 	
-	private List<String> readLines(long lastOffset, long newOffset) throws IOException{
+	private List<String> readLines(long newOffset) throws IOException{
 		List<String> retList = Lists.newArrayList();
 		
 		int lineCount = 0;
-		while(lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
-			this.fileHandler.seek(lastOffset);
-			String newLine = this.fileHandler.readLine();
+		while(this.lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
+			this.fileHandler.position(this.lastOffset);
+			String newLine = this.readLine();
 			if(StringUtils.isEmpty(newLine)){
-				break;
+				continue;
 			}
-			lastOffset += newLine.length() + 1;
 			retList.add(newLine);
 			lineCount ++;
 		}
@@ -120,6 +122,26 @@ public class SingleFileReader {
 		}
 		
 		return retList;
+	}
+	
+	private String readLine() throws IOException{
+		ByteBuffer dst = ByteBuffer.allocate(1024);
+		StringBuffer input = new StringBuffer();
+		
+        while(this.fileHandler.read(dst) > 0){
+        	dst.rewind();
+        	for(int i=0; i < dst.limit(); i++){
+        		char ch = (char)dst.get();
+        		this.lastOffset ++;
+        		if('\r' == ch || '\n' == ch){
+        			return input.toString();
+        		} else {
+        			input.append(ch);
+        		}
+        	}
+        	dst.flip();
+        }
+        return input.toString();
 	}
 	
 	public void setReady(boolean ready) {

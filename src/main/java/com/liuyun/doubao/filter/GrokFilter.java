@@ -37,10 +37,11 @@ public class GrokFilter extends DefaultFilter {
 			
 			Map<String, Object> rowMap = gm.toMap();
 			if(rowMap.isEmpty()){
-				logger.error("grokparsefailure: {}", strMsg);
 				Context.addTag2Data(data, "_grokparsefailure");
+				return false;
+			} else {
+				data.putAll(gm.toMap());
 			}
-			data.putAll(gm.toMap());
 		} catch (GrokException e) {
 			logger.error("grokparsefailure", e);
 		}

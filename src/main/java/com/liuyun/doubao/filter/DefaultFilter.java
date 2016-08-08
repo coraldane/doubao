@@ -66,7 +66,7 @@ public abstract class DefaultFilter implements Filter {
 		if(StringUtils.isNotEmpty(this.getFilterConfig().getPluginName()) && null != this.plugin){
 			return this.plugin.filter(data);
 		}
-		return FilterResult.newNotMatch();
+		return FilterResult.newMatched(true);
 	}
 	
 	public abstract void setFilterConfig(DefaultFilterConfig filterConfig);

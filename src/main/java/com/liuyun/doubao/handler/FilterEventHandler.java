@@ -3,6 +3,8 @@ package com.liuyun.doubao.handler;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -15,6 +17,8 @@ import com.liuyun.doubao.io.Filter;
 import com.liuyun.doubao.io.FilterResult;
 
 public class FilterEventHandler implements ClosableEventHandler {
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	private static final ExtensionLoader<Filter> loader = ExtensionLoader.getExtensionLoader(Filter.class);
 	
 	private List<List<Filter>> filters = Lists.newArrayList();
