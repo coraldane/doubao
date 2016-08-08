@@ -47,20 +47,16 @@ public class FilterEventHandler implements ClosableEventHandler {
 	@Override
 	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
 		JSONObject data = event.get();
-		boolean bEnter = false;
 		boolean denied = false;
 		for(List<Filter> filterList: this.filters){
 			for(Filter filter: filterList){
 				FilterResult result = filter.doMatch(data);
-				if(result.isMatched()){
-					bEnter = true;
-				}
 				if(false == result.isContinued()){
 					denied = true;
 					break;
 				}
 			}
-			if(bEnter || denied){
+			if(denied){
 				break;
 			}
 		}

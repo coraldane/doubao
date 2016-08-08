@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -27,10 +28,12 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 
 	@Override
 	public FilterResult filter(JSONObject data) {
-		JSONObject taskInfo = data.getJSONObject("task_info");
+		String strJson = data.getString("logger_message");
+		JSONObject taskInfo = JSON.parseObject(strJson);
 		if(null == taskInfo){
 			return FilterResult.newDrop();
 		}
+		data.remove("logger_message");
 		
 		JSONObject paramsObj = taskInfo.getJSONObject("params");
 		if(null == paramsObj){

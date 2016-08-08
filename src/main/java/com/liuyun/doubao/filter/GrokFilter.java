@@ -15,8 +15,10 @@ import com.nflabs.grok.Match;
 public class GrokFilter extends DefaultFilter {
 	
 	private static final String DEFAULT_GROK_PATTERN_FILE_PATH = "conf/patterns/grok-patterns";
+	private static String[] NOT_USED_ARGS = new String[]{"BASE10NUM", "YEAR", "MONTHNUM", "MONTHDAY", "HOUR", "MINUTE", "SECOND", "ISO8601_TIMEZONE"};
 	
 	private GrokFilterConfig filterConfig = new GrokFilterConfig();
+	private Grok grok = new Grok();
 	
 	@Override
 	public boolean doFilter(JSONObject data) {
@@ -28,22 +30,19 @@ public class GrokFilter extends DefaultFilter {
 		if(StringUtils.isBlank(strMsg)){
 			return false;
 		}
-		Grok grok = new Grok();
-		try {
-			grok.addPatternFromFile(DEFAULT_GROK_PATTERN_FILE_PATH);
-			grok.compile(this.filterConfig.getMatchBean().getPattern());
-			Match gm = grok.match(strMsg);
-			gm.captures();
-			
-			Map<String, Object> rowMap = gm.toMap();
-			if(rowMap.isEmpty()){
-				Context.addTag2Data(data, "_grokparsefailure");
-				return false;
-			} else {
-				data.putAll(gm.toMap());
+		
+		Match gm = grok.match(strMsg);
+		gm.captures();
+		
+		Map<String, Object> rowMap = gm.toMap();
+		if(rowMap.isEmpty()){
+			Context.addTag2Data(data, "_grokparsefailure");
+			return false;
+		} else {
+			for(String key: NOT_USED_ARGS){
+				rowMap.remove(key);
 			}
-		} catch (GrokException e) {
-			logger.error("grokparsefailure", e);
+			data.putAll(rowMap);
 		}
 		return true;
 	}
@@ -52,6 +51,13 @@ public class GrokFilter extends DefaultFilter {
 	public void setFilterConfig(DefaultFilterConfig filterConfig) {
 		if(filterConfig instanceof GrokFilterConfig){
 			this.filterConfig = (GrokFilterConfig)filterConfig;
+			
+			try {
+				grok.addPatternFromFile(DEFAULT_GROK_PATTERN_FILE_PATH);
+				grok.compile(this.filterConfig.getMatchBean().getPattern());
+			} catch (GrokException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

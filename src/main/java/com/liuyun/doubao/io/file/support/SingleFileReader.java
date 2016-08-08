@@ -1,5 +1,6 @@
 package com.liuyun.doubao.io.file.support;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -102,8 +103,8 @@ public class SingleFileReader {
 		List<String> retList = Lists.newArrayList();
 		
 		int lineCount = 0;
+		this.fileHandler.position(this.lastOffset);
 		while(this.lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
-			this.fileHandler.position(this.lastOffset);
 			String newLine = this.readLine();
 			if(StringUtils.isEmpty(newLine)){
 				continue;
@@ -126,22 +127,22 @@ public class SingleFileReader {
 	
 	private String readLine() throws IOException{
 		ByteBuffer dst = ByteBuffer.allocate(1024);
-		StringBuffer input = new StringBuffer();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
         while(this.fileHandler.read(dst) > 0){
         	dst.rewind();
         	for(int i=0; i < dst.limit(); i++){
-        		char ch = (char)dst.get();
+        		byte ch = dst.get();
         		this.lastOffset ++;
         		if('\r' == ch || '\n' == ch){
-        			return input.toString();
+        			return baos.toString();
         		} else {
-        			input.append(ch);
+        			baos.write(ch);
         		}
         	}
         	dst.flip();
         }
-        return input.toString();
+        return baos.toString();
 	}
 	
 	public void setReady(boolean ready) {
