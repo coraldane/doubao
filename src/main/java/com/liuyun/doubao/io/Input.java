@@ -1,16 +1,12 @@
 package com.liuyun.doubao.io;
 
-import java.util.List;
-
-import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.InputConfig;
+import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.extension.SPI;
 
 @SPI
-public interface Input extends Closable {
+public interface Input extends Closable, Stopable {
 	
-	void init(InputConfig inputConfig);
+	void init(InputConfig inputConfig, Context context);
 	
-	List<JSONObject> read();
-
 }

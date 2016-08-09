@@ -1,7 +1,7 @@
 {
 	"input": {
 		"file": {
-			"path": ["/opt/deploy/logs/cyberlocker.log"],
+			"path": ["/opt/deploy/logs/test.log"],
 			"type": "cyberlocker",
 			"start_position": "beginning"
 		}
@@ -13,7 +13,8 @@
 					"field_name": "message",
 					"pattern": "%{TIMESTAMP_ISO8601:time_local} (.*) - %{DATA:method_name} %{LOGLEVEL:log_level}  \\(%{GREEDYDATA:file_name}:%{NUMBER:file_pos}\\) - request string: (?<logger_message>.*)"
 				},
-				"remove_fields": ["message"]
+				"remove_fields": ["message"],
+				"start_position": "beginning"
 			},
 			"contains": {
 				"field_name": "tags",
@@ -47,7 +48,7 @@
 		"redis": {
 			"host": "udai.com",
 			"passwd": "redis@udai",
-			"key": "logstash-cyberlocker-dest"
+			"key": "logstash-cyberlocker-origin-other"
 		}
 	}
 }

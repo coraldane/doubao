@@ -16,14 +16,15 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
+import com.liuyun.doubao.io.Stopable;
 import com.liuyun.doubao.utils.DateUtils;
 import com.liuyun.doubao.utils.StringUtils;
 import com.liuyun.doubao.utils.SysUtils;
 
-public class SingleFileReader {
+public class SingleFileReader implements Stopable {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private static final int MAX_READ_LINES_PER_TIME = 100;
+	private static final int MAX_READ_LINES_PER_TIME = 1000;
 	
 	private boolean ready = true;
 	private boolean waitForReading = true;

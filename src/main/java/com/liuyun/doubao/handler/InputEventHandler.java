@@ -31,7 +31,7 @@ public class InputEventHandler extends StopableThread {
 		
 		this.input = loader.createExtensionByIdentified(inputConfig.getClass().getAnnotation(Identified.class));
 		if (null != this.input) {
-			this.input.init(inputConfig);
+			this.input.init(inputConfig, context);
 		}
 	}
 

@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.file.FileInputConfig;
+import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.io.Input;
 import com.liuyun.doubao.io.file.support.FilePathWatcher;
 import com.liuyun.doubao.io.file.support.PathChangeEventListener;
@@ -39,7 +40,7 @@ public class FileInput implements Input {
 	private FileInputConfig inputConfig = null;
 	
 	@Override
-	public void init(InputConfig inputConfig) {
+	public void init(InputConfig inputConfig, Context context) {
 		if(inputConfig instanceof FileInputConfig){
 			this.inputConfig = (FileInputConfig)inputConfig;
 			
@@ -94,8 +95,12 @@ public class FileInput implements Input {
 			handler.flush();
 		}
 	}
-
+	
 	@Override
+	public void stop(){
+		
+	}
+
 	public List<JSONObject> read() {
 		List<JSONObject> dataList = Lists.newArrayList();
 		for(SingleFileReader fileReader: this.fileReaderMap.values()){
