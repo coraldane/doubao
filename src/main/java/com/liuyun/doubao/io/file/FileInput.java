@@ -20,7 +20,6 @@ import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.io.Input;
 import com.liuyun.doubao.io.file.support.FilePathWatcher;
-import com.liuyun.doubao.io.file.support.FileUniqueKey;
 import com.liuyun.doubao.io.file.support.PathChangeEventListener;
 import com.liuyun.doubao.io.file.support.PathResolver;
 import com.liuyun.doubao.io.file.support.SincedbHandler;
@@ -35,7 +34,7 @@ public class FileInput implements Input {
 	
 	private List<FilePathWatcher> pathWatcherList = Lists.newArrayList();
 	private Map<String, SincedbHandler> sincedbHandlerMap = Maps.newConcurrentMap();
-	private Map<FileUniqueKey, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
+	private Map<String, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
 	
 	private FileInputConfig inputConfig = null;
 	

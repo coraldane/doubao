@@ -50,19 +50,19 @@ public class SincedbHandler implements Runnable {
 		return fileInputConfig;
 	}
 
-	public long getOffset(FileUniqueKey fileKey){
-		if(this.offsetMap.containsKey(fileKey.toString())){
-			return this.offsetMap.get(fileKey.toString());
+	public long getOffset(String fileKey){
+		if(this.offsetMap.containsKey(fileKey)){
+			return this.offsetMap.get(fileKey);
 		}
 		return 0;
 	}
 	
-	public void setOffset(FileUniqueKey fileKey, long offset){
-		this.offsetMap.put(fileKey.toString(), offset);
+	public void setOffset(String fileKey, long offset){
+		this.offsetMap.put(fileKey, offset);
 	}
 	
-	public void removeFile(FileUniqueKey fileKey){
-		this.offsetMap.remove(fileKey.toString());
+	public void removeFile(String fileKey){
+		this.offsetMap.remove(fileKey);
 	}
 	
 	private void initialFromDisk() throws IOException{

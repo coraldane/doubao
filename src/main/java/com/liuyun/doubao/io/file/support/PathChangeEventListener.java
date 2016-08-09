@@ -15,11 +15,11 @@ public class PathChangeEventListener {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private Map<FileUniqueKey, SingleFileReader> fileReaderMap = null;
-	private Map<Path, FileUniqueKey> fileKeyMap = Maps.newConcurrentMap();
+	private Map<String, SingleFileReader> fileReaderMap = null;
+	private Map<String, String> fileKeyMap = Maps.newConcurrentMap();
 	private SincedbHandler sincedbHandler = null;
 	
-	public PathChangeEventListener(SincedbHandler handler, Map<FileUniqueKey, SingleFileReader> fileReaderMap){
+	public PathChangeEventListener(SincedbHandler handler, Map<String, SingleFileReader> fileReaderMap){
 		this.sincedbHandler = handler;
 		this.fileReaderMap = fileReaderMap;
 	}
@@ -29,30 +29,38 @@ public class PathChangeEventListener {
 		if(null == this.fileReaderMap){
 			this.fileReaderMap = Maps.newConcurrentMap();
 		}
-		FileUniqueKey fileKey = FileUtils.getInodeAndDevice(path);
-		if(this.fileReaderMap.containsKey(fileKey)){//文件重命名
-			for(Path p: this.fileKeyMap.keySet()){
-				if(fileKey.equals(this.fileKeyMap.get(p))){
-					this.fileKeyMap.remove(p);
-				}
-			}
-			this.fileKeyMap.put(path, fileKey);
-		} else {
+		String fileKey = FileUtils.getInodeAndDevice(path);
+		if(!this.fileReaderMap.containsKey(fileKey)){
 			SingleFileReader fileReader = new SingleFileReader(path, fileKey, sincedbHandler);
 			this.fileReaderMap.put(fileKey, fileReader);
-			this.fileKeyMap.put(path, fileKey);
+			this.fileKeyMap.put(path.toString(), fileKey);
 		}
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
-		if(!this.fileKeyMap.containsKey(child)){
+		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}
 		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		
-		FileUniqueKey fileKey = this.fileKeyMap.get(child);
-		if("ENTRY_CREATE".equals(kind.name()) || "ENTRY_MODIFY".equals(kind.name())){
+		String fileKey = FileUtils.getInodeAndDevice(child);
+		if("ENTRY_CREATE".equals(kind.name())){
 			this.fileReaderMap.get(fileKey).setReady(true);
+		} else if("ENTRY_MODIFY".equals(kind.name())){
+			String oldFileKey = this.fileKeyMap.get(child.toString());
+			if(fileKey.equals(oldFileKey)){
+				this.fileReaderMap.get(fileKey).setReady(true);
+			} else {
+				try {
+					this.fileKeyMap.put(child.toString(), fileKey);
+					logger.debug("file has changed, path: {}", child.toString());
+					SingleFileReader fileReader = this.fileReaderMap.get(oldFileKey);
+					this.fileReaderMap.put(fileKey, fileReader);
+					fileReader.reset(fileKey, child);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		} else if("ENTRY_DELETE".equals(kind.name())){
 			this.sincedbHandler.removeFile(fileKey);
 			this.fileReaderMap.get(fileKey).destroy();

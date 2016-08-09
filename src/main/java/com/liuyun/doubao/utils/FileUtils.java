@@ -9,13 +9,18 @@ import com.liuyun.doubao.io.file.support.FileUniqueKey;
 
 public class FileUtils {
 	
-	public static FileUniqueKey getInodeAndDevice(Path path) throws IOException{
-		BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-		Object fileKey = attr.fileKey();
-		String s = fileKey.toString();
-		String inode = s.substring(s.indexOf("ino=") + 4, s.indexOf(")"));
-		String device = s.substring(s.indexOf("dev=") + 4, s.indexOf(","));
-		return new FileUniqueKey(inode, device);
+	public static String getInodeAndDevice(Path path) {
+		try {
+			BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+			Object fileKey = attr.fileKey();
+			String s = fileKey.toString();
+			String inode = s.substring(s.indexOf("ino=") + 4, s.indexOf(")"));
+			String device = s.substring(s.indexOf("dev=") + 4, s.indexOf(","));
+			return new FileUniqueKey(inode, device).toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return ",";
 	}
 	
 }

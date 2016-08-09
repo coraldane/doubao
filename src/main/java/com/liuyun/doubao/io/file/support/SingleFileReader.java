@@ -25,17 +25,17 @@ public class SingleFileReader {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static final int MAX_READ_LINES_PER_TIME = 100;
 	
-	private volatile boolean ready = true;
-	private volatile boolean waitForReading = true;
-	private volatile long lastOffset = 0L;
+	private boolean ready = true;
+	private boolean waitForReading = true;
+	private long lastOffset = 0L;
 	
 	private SeekableByteChannel fileHandler = null;
-	private FileUniqueKey fileKey;
+	private String fileKey;
 	private SincedbHandler sincedbHandler;
 	
 	private MessageBean messageBean = new MessageBean();
 	
-	public SingleFileReader(Path path, FileUniqueKey fileKey, SincedbHandler sincedbHandler) throws IOException {
+	public SingleFileReader(Path path, String fileKey, SincedbHandler sincedbHandler) throws IOException {
 		this.fileKey = fileKey;
 		this.sincedbHandler = sincedbHandler;
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
@@ -103,8 +103,8 @@ public class SingleFileReader {
 		List<String> retList = Lists.newArrayList();
 		
 		int lineCount = 0;
-		this.fileHandler.position(this.lastOffset);
 		while(this.lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
+			this.fileHandler.position(this.lastOffset);
 			String newLine = this.readLine();
 			if(StringUtils.isEmpty(newLine)){
 				continue;
@@ -114,7 +114,6 @@ public class SingleFileReader {
 		}
 		
 		if(lineCount == MAX_READ_LINES_PER_TIME && lastOffset < newOffset){
-			this.lastOffset = lastOffset;
 			this.sincedbHandler.setOffset(this.fileKey, newOffset);
 			this.waitForReading = true;
 		} else {
@@ -143,6 +142,15 @@ public class SingleFileReader {
         	dst.flip();
         }
         return baos.toString();
+	}
+	
+	public void reset(String newFileKey, Path path) throws IOException {
+		this.fileKey = newFileKey;
+		this.lastOffset = 0;
+		this.destroy();
+		
+		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
+		this.setReady(true);
 	}
 	
 	public void setReady(boolean ready) {
