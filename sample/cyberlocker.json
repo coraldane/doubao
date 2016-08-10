@@ -11,7 +11,8 @@
         "match": {
           "field_name": "message",
           "pattern": "%{TIMESTAMP_ISO8601:time_local} (.*) - %{DATA:method_name} %{LOGLEVEL:log_level}  \\(%{GREEDYDATA:file_name}:%{NUMBER:file_pos}\\) - request string: (?<logger_message>.*)"
-        }
+        },
+        "remove_fields": ["message"]
       },
       "contains": {
         "field_name": "tags",
