@@ -28,6 +28,7 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 	
 	public PathChangedEventProcessor(Context context){
 		this.context = context;
+		new Thread(this.dataReaderFactory).start();
 	}
 	
 	public void addSincedbHandler(String hashKey) throws IOException{
@@ -49,10 +50,10 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
-		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}
+		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		
 		SincedbHandler sincedbHandler = this.getSincedbHandler(child);
 		String fileKey = FileUtils.getInodeAndDevice(child);

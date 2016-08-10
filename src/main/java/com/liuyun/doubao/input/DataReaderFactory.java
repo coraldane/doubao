@@ -3,7 +3,7 @@ package com.liuyun.doubao.input;
 import com.liuyun.doubao.io.Closable;
 import com.liuyun.doubao.io.Stopable;
 
-public interface DataReaderFactory extends Stopable, Closable {
+public interface DataReaderFactory extends Stopable, Closable, Runnable {
 
 	void addReader(String key, AbstractStopableDataReader dataReader);
 	
