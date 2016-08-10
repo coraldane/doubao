@@ -1,9 +1,9 @@
-package com.liuyun.doubao.handler;
+package com.liuyun.doubao.processor;
 
 import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.ctx.JsonEvent;
 import com.lmax.disruptor.EventHandler;
 
-public interface ClosableEventHandler extends EventHandler<JsonEvent>, InitializingBean {
+public interface ClosableProcessor extends EventHandler<JsonEvent>, InitializingBean {
 
 }

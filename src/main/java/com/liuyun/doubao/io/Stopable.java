@@ -2,6 +2,6 @@ package com.liuyun.doubao.io;
 
 public interface Stopable {
 
-	void stop();
+	void stop(boolean waitCompleted);
 	
 }

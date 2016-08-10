@@ -11,11 +11,10 @@ import com.liuyun.doubao.config.DoubaoConfig;
 import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.ctx.JsonEvent;
 import com.liuyun.doubao.ctx.JsonEventFactory;
-import com.liuyun.doubao.handler.ClosableEventHandler;
-import com.liuyun.doubao.handler.FilterEventHandler;
-import com.liuyun.doubao.handler.InputEventHandler;
-import com.liuyun.doubao.handler.OutputHolder;
-import com.liuyun.doubao.handler.StopableThread;
+import com.liuyun.doubao.processor.ClosableProcessor;
+import com.liuyun.doubao.processor.FilterProcessor;
+import com.liuyun.doubao.processor.InputProcessor;
+import com.liuyun.doubao.processor.OutputHolder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -26,7 +25,7 @@ public class DefaultChannel implements Channel {
 
 	private Context context = null;
 
-	private StopableThread inputEventHandler = null;
+	private InputProcessor inputEventHandler = null;
 	private List<InitializingBean> handlerList = Lists.newArrayList();
 
 	@Override
@@ -36,23 +35,21 @@ public class DefaultChannel implements Channel {
 
 	@Override
 	public void start() {
-		ClosableEventHandler filterHandler = new FilterEventHandler();
+		ClosableProcessor filterHandler = new FilterProcessor();
 		this.addHandler(filterHandler, this.context);
 		this.context.setFilterQueue(this.makeRingBuffer(new EventHandler[]{filterHandler}));
 		
 		OutputHolder outputHolder = new OutputHolder();
 		this.addHandler(outputHolder, this.context);
 		this.context.setOutputQueue(this.makeRingBuffer(outputHolder.getOutputEventHandlers()));
-
-		this.inputEventHandler = new InputEventHandler(this.context);
+		
+		this.inputEventHandler = new InputProcessor();
 		this.inputEventHandler.init(this.context);
-		this.inputEventHandler.start();
 	}
 
 	@Override
 	public void stop() {
 		this.inputEventHandler.stop(false);
-		
 		this.context.stop();
 		
 		this.inputEventHandler.destroy(this.context);

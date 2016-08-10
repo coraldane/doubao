@@ -1,4 +1,4 @@
-package com.liuyun.doubao.handler;
+package com.liuyun.doubao.processor;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Filter;
 import com.liuyun.doubao.io.FilterResult;
 
-public class FilterEventHandler implements ClosableEventHandler {
+public class FilterProcessor implements ClosableProcessor {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private static final ExtensionLoader<Filter> loader = ExtensionLoader.getExtensionLoader(Filter.class);

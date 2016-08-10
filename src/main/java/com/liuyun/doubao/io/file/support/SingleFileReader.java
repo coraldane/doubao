@@ -10,24 +10,21 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
-import com.liuyun.doubao.io.Stopable;
+import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.processor.InputEventProcessor;
 import com.liuyun.doubao.utils.DateUtils;
+import com.liuyun.doubao.utils.FileUtils;
 import com.liuyun.doubao.utils.StringUtils;
 import com.liuyun.doubao.utils.SysUtils;
 
-public class SingleFileReader implements Stopable {
+public class SingleFileReader extends InputEventProcessor {
 	
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static final int MAX_READ_LINES_PER_TIME = 1000;
 	
-	private boolean ready = true;
-	private boolean waitForReading = true;
 	private long lastOffset = 0L;
 	
 	private SeekableByteChannel fileHandler = null;
@@ -36,8 +33,9 @@ public class SingleFileReader implements Stopable {
 	
 	private MessageBean messageBean = new MessageBean();
 	
-	public SingleFileReader(Path path, String fileKey, SincedbHandler sincedbHandler) throws IOException {
-		this.fileKey = fileKey;
+	public SingleFileReader(Context context, Path path, SincedbHandler sincedbHandler) throws IOException {
+		super.setContext(context);
+		this.fileKey = FileUtils.getInodeAndDevice(path);
 		this.sincedbHandler = sincedbHandler;
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
 		this.messageBean.setPath(path.toString());
@@ -63,12 +61,12 @@ public class SingleFileReader implements Stopable {
 			e.printStackTrace();
 		}
 	}
-
-	public List<JSONObject> read() throws IOException{
-		List<JSONObject> retList = Lists.newArrayList();
+	
+	@Override
+	public boolean doTask(Context context) throws Exception {
 		List<String> strLineList = null;
 		if(ready){
-			this.setReady(false);
+			this.ready = false;
 			this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
 			long newOffset = this.fileHandler.size();
 			
@@ -77,7 +75,7 @@ public class SingleFileReader implements Stopable {
 			long newOffset = this.sincedbHandler.getOffset(this.fileKey);
 			strLineList = this.readLines(newOffset);
 		} else {
-			return null;
+			return false;
 		}
 		
 		if(CollectionUtils.isNotEmpty(strLineList)){
@@ -94,10 +92,10 @@ public class SingleFileReader implements Stopable {
 					json.put("tags", fileInputConfig.getTags());
 				}
 				json.put("message", strLine);
-				retList.add(json);
+				super.write(json);
 			}
 		}
-		return retList;
+		return true;
 	}
 	
 	private List<String> readLines(long newOffset) throws IOException{
@@ -151,11 +149,7 @@ public class SingleFileReader implements Stopable {
 		this.destroy();
 		
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
-		this.setReady(true);
-	}
-	
-	public void setReady(boolean ready) {
-		this.ready = ready;
+		this.ready = true;
 	}
 	
 	public void destroy(){
@@ -168,5 +162,5 @@ public class SingleFileReader implements Stopable {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

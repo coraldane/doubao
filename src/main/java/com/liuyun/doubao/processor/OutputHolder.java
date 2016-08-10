@@ -1,4 +1,4 @@
-package com.liuyun.doubao.handler;
+package com.liuyun.doubao.processor;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +22,7 @@ public class OutputHolder implements InitializingBean {
 	
 	private static final ExtensionLoader<Output> loader = ExtensionLoader.getExtensionLoader(Output.class);
 	
-	private List<OutputEventHandler> outputEventHandlers = Lists.newArrayList();
+	private List<OutputProcessor> outputEventHandlers = Lists.newArrayList();
 	private ExecutorService executor = null;
 	
 	@Override
@@ -39,7 +39,7 @@ public class OutputHolder implements InitializingBean {
 			
 			if(null != output){
 				output.init(outputConfig);
-				OutputEventHandler thread = new OutputEventHandler(output, outputConfig.getBatchSize());
+				OutputProcessor thread = new OutputProcessor(output, outputConfig.getBatchSize());
 				this.outputEventHandlers.add(thread);
 				executor.submit(thread);
 			}
@@ -48,13 +48,13 @@ public class OutputHolder implements InitializingBean {
 
 	@Override
 	public void destroy(Context context) {
-		for(OutputEventHandler thread: this.outputEventHandlers){
+		for(OutputProcessor thread: this.outputEventHandlers){
 			thread.getOutput().destroy();
 		}
 	}
 
-	public OutputEventHandler[] getOutputEventHandlers() {
-		OutputEventHandler[] retArray = new OutputEventHandler[this.outputEventHandlers.size()];
+	public OutputProcessor[] getOutputEventHandlers() {
+		OutputProcessor[] retArray = new OutputProcessor[this.outputEventHandlers.size()];
 		for(int index=0; index < this.outputEventHandlers.size(); index++){
 			retArray[index] = this.outputEventHandlers.get(index);
 		}

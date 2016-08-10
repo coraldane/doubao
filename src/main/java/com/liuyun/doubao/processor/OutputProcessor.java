@@ -1,4 +1,4 @@
-package com.liuyun.doubao.handler;
+package com.liuyun.doubao.processor;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import com.liuyun.doubao.io.Output;
 import com.liuyun.doubao.utils.SysUtils;
 import com.lmax.disruptor.EventHandler;
 
-public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
+public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private Output output = null;
@@ -22,7 +22,7 @@ public class OutputEventHandler implements EventHandler<JsonEvent>, Runnable {
 	
 	private List<JSONObject> dataBuffer = Lists.newArrayList();
 	
-	public OutputEventHandler(Output output, int batchSize){
+	public OutputProcessor(Output output, int batchSize){
 		this.output = output;
 		this.batchSize = batchSize;
 	}

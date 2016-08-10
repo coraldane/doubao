@@ -1,30 +1,28 @@
-package com.liuyun.doubao.handler;
+package com.liuyun.doubao.processor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liuyun.doubao.common.InitializingBean;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.io.Stopable;
 import com.liuyun.doubao.utils.SysUtils;
 
-public abstract class StopableThread extends Thread implements InitializingBean {
-	
+public abstract class StopableThread implements Stopable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	protected static final int DEFAULT_POLL_TIMEOUT = 3;
 	
-	private static volatile boolean running = true;
+	protected static volatile boolean running = true;
 	private volatile boolean continued = true;
 	private volatile boolean stoped = false;
 	
 	protected Context context = null;
 	
-	public StopableThread(Context context){
+	public void setContext(Context context) {
 		this.context = context;
 	}
-	
-	@Override
-	public void run(){
+
+	public void start(){
 		try{
 			while(running || continued){
 				boolean result = doTask(this.context);
@@ -56,11 +54,7 @@ public abstract class StopableThread extends Thread implements InitializingBean 
 
 	public void waitForStoped() {
 		while(!this.stoped){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				
-			}
+			SysUtils.sleep(100);
 		}
 	}
 	

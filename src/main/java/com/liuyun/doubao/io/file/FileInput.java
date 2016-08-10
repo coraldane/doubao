@@ -13,7 +13,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.InputConfig;
@@ -38,9 +37,11 @@ public class FileInput implements Input {
 	private Map<String, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
 	
 	private FileInputConfig inputConfig = null;
+	private Context context = null;
 	
 	@Override
 	public void init(InputConfig inputConfig, Context context) {
+		this.context = context;
 		if(inputConfig instanceof FileInputConfig){
 			this.inputConfig = (FileInputConfig)inputConfig;
 			
@@ -69,7 +70,7 @@ public class FileInput implements Input {
 			String hashKey = DigestUtils.md2Hex(filepath);
 			
 			SincedbHandler sincedbHandler = new SincedbHandler(hashKey, inputConfig);
-			PathChangeEventListener eventListener = new PathChangeEventListener(sincedbHandler, this.fileReaderMap);
+			PathChangeEventListener eventListener = new PathChangeEventListener(this.context, sincedbHandler, this.fileReaderMap);
 			FilePathWatcher pathWatcher = new FilePathWatcher(start, filepath, this.inputConfig, eventListener);
 			
 			this.pathWatcherList.add(pathWatcher);
@@ -97,23 +98,13 @@ public class FileInput implements Input {
 	}
 	
 	@Override
-	public void stop(){
-		
-	}
-
-	public List<JSONObject> read() {
-		List<JSONObject> dataList = Lists.newArrayList();
+	public void stop(boolean waitCompleted){
 		for(SingleFileReader fileReader: this.fileReaderMap.values()){
-			try {
-				List<JSONObject> itemList = fileReader.read();
-				if(null != itemList){
-					dataList.addAll(itemList);
-				}
-			} catch (IOException e) {
-//				e.printStackTrace();
-			}
+			fileReader.stop(false);
 		}
-		return dataList;
+		for(SingleFileReader fileReader: this.fileReaderMap.values()){
+			fileReader.waitForStoped();
+		}
 	}
 
 }

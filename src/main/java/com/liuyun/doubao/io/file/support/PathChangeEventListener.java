@@ -9,17 +9,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.utils.FileUtils;
 
 public class PathChangeEventListener {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	private Context context = null;
 	private Map<String, SingleFileReader> fileReaderMap = null;
 	private Map<String, String> fileKeyMap = Maps.newConcurrentMap();
 	private SincedbHandler sincedbHandler = null;
 	
-	public PathChangeEventListener(SincedbHandler handler, Map<String, SingleFileReader> fileReaderMap){
+	public PathChangeEventListener(Context context, SincedbHandler handler, Map<String, SingleFileReader> fileReaderMap){
+		this.context = context;
 		this.sincedbHandler = handler;
 		this.fileReaderMap = fileReaderMap;
 	}
@@ -31,25 +34,25 @@ public class PathChangeEventListener {
 		}
 		String fileKey = FileUtils.getInodeAndDevice(path);
 		if(!this.fileReaderMap.containsKey(fileKey)){
-			SingleFileReader fileReader = new SingleFileReader(path, fileKey, sincedbHandler);
+			SingleFileReader fileReader = new SingleFileReader(context, path, sincedbHandler);
 			this.fileReaderMap.put(fileKey, fileReader);
 			this.fileKeyMap.put(path.toString(), fileKey);
 		}
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) {
+		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}
-		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		
 		String fileKey = FileUtils.getInodeAndDevice(child);
 		if("ENTRY_CREATE".equals(kind.name())){
-			this.fileReaderMap.get(fileKey).setReady(true);
+			this.fileReaderMap.get(fileKey).waitingForRead();
 		} else if("ENTRY_MODIFY".equals(kind.name())){
 			String oldFileKey = this.fileKeyMap.get(child.toString());
 			if(fileKey.equals(oldFileKey)){
-				this.fileReaderMap.get(fileKey).setReady(true);
+				this.fileReaderMap.get(fileKey).waitingForRead();
 			} else {
 				try {
 					this.fileKeyMap.put(child.toString(), fileKey);
