@@ -35,8 +35,13 @@ public class FileReaderFactory implements DataReaderFactory {
 	
 	@Override
 	public void stop(boolean waitCompleted) {
+		for(DataReadConsumer consumer: this.consumerMap.values()){
+			consumer.stop();
+		}
+		
+		this.executor.shutdown();
 		for(String key: this.fileReaderMap.keySet()){
-			final AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
+			AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
 			dataReader.stop(waitCompleted);
 		}
 	}
@@ -99,7 +104,10 @@ public class FileReaderFactory implements DataReaderFactory {
 }
 
 class DataReadConsumer implements Runnable {
+	
+	protected volatile boolean running = true;
 	private volatile boolean ready = false;
+	protected volatile boolean readyForStop = false;
 	
 	private AbstractStopableDataReader dataReader = null;
 	
@@ -109,7 +117,7 @@ class DataReadConsumer implements Runnable {
 	
 	@Override
 	public void run(){
-		while(true){
+		while(running){
 			if(ready){
 				try {
 					this.dataReader.readData();
@@ -120,10 +128,19 @@ class DataReadConsumer implements Runnable {
 				SysUtils.sleep(100);
 			}
 		}
+		readyForStop = true;
 	}
 
 	public void setReady(boolean ready) {
 		this.ready = ready;
+	}
+
+	public void stop() {
+		this.dataReader.stop(false);
+		this.running = false;
+		while(!this.readyForStop){
+			SysUtils.sleep(100);
+		}
 	}
 	
 }

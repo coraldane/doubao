@@ -23,7 +23,7 @@ import com.liuyun.doubao.utils.SysUtils;
 
 public class SingleFileReader extends AbstractStopableDataReader {
 	
-	private static final int MAX_READ_LINES_PER_TIME = 1000;
+	private static final int MAX_READ_LINES_PER_TIME = 100;
 	
 	protected volatile boolean waitForReading = true;
 	private long lastOffset = 0L;

@@ -50,7 +50,7 @@ public class InputProcessor implements InitializingBean, Stopable {
 
 	@Override
 	public void stop(boolean waitCompleted) {
-		this.input.stop(false);
+		this.input.stop(waitCompleted);
 	}
 
 }
