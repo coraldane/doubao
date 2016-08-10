@@ -29,7 +29,7 @@
 	</appender>
 	
 	<root>
-        <level value="DEBUG"/>
+        <level value="INFO"/>
 		<appender-ref ref="myConsole" />
 		<appender-ref ref="errorFile"/>
 	</root>

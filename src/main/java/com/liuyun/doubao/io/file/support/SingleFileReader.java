@@ -65,23 +65,21 @@ public class SingleFileReader extends AbstractStopableDataReader {
 	@Override
 	public void readData() throws IOException {
 		this.setReadyForStop(false);
-		while(ready || waitForReading){
-			List<String> strLineList = null;
+		
+		this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
+		long newOffset = this.fileHandler.size();
+		
+		List<String> strLineList = this.readLines(newOffset);
+		this.writeData(strLineList);
+		
+		while(waitForReading){
 			if(stopImmediately){
 				this.sincedbHandler.setOffset(this.fileKey, this.lastOffset);
 				break;
-			} else if(ready){
-				this.ready = false;
-				this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
-				long newOffset = this.fileHandler.size();
-				
-				strLineList = this.readLines(newOffset);
-			} else if(waitForReading){
-				long newOffset = this.sincedbHandler.getOffset(this.fileKey);
-				strLineList = this.readLines(newOffset);
-			} else {
-				break;
 			}
+			
+			newOffset = this.sincedbHandler.getOffset(this.fileKey);
+			strLineList = this.readLines(newOffset);
 			this.writeData(strLineList);
 		}
 		this.setReadyForStop(true);
@@ -158,7 +156,6 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		this.destroy();
 		
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
-		this.ready = true;
 	}
 	
 	@Override

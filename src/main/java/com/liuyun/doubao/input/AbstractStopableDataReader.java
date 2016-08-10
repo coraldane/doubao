@@ -7,7 +7,6 @@ import com.liuyun.doubao.utils.SysUtils;
 
 public abstract class AbstractStopableDataReader implements InputDataReader, Closable, Stopable {
 	
-	protected volatile boolean ready = true;
 	protected volatile boolean stopImmediately = false;
 	protected volatile boolean readyForStop = true;
 	
@@ -19,7 +18,6 @@ public abstract class AbstractStopableDataReader implements InputDataReader, Clo
 	
 	@Override
 	public void stop(boolean waitCompleted) {
-		this.ready = false;
 		if(waitCompleted){
 			while(!this.readyForStop){
 				SysUtils.sleep(100);
@@ -27,11 +25,6 @@ public abstract class AbstractStopableDataReader implements InputDataReader, Clo
 		} else {
 			this.stopImmediately = true;
 		}
-	}
-
-	@Override
-	public void notifyForRead() {
-		this.ready = true;
 	}
 
 	public void setReadyForStop(boolean readyForStop) {
