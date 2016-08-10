@@ -25,6 +25,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 	
 	private static final int MAX_READ_LINES_PER_TIME = 1000;
 	
+	protected volatile boolean waitForReading = true;
 	private long lastOffset = 0L;
 	
 	private SeekableByteChannel fileHandler = null;
@@ -66,7 +67,10 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		this.setReadyForStop(false);
 		while(ready || waitForReading){
 			List<String> strLineList = null;
-			if(ready){
+			if(stopImmediately){
+				this.sincedbHandler.setOffset(this.fileKey, this.lastOffset);
+				break;
+			} else if(ready){
 				this.ready = false;
 				this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
 				long newOffset = this.fileHandler.size();
@@ -157,6 +161,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		this.ready = true;
 	}
 	
+	@Override
 	public void destroy(){
 		try {
 			if(null != this.fileHandler){

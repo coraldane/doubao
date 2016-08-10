@@ -20,7 +20,6 @@ import com.liuyun.doubao.io.Input;
 import com.liuyun.doubao.io.file.support.FilePathWatcher;
 import com.liuyun.doubao.io.file.support.PathChangedEventProcessor;
 import com.liuyun.doubao.io.file.support.PathResolver;
-import com.liuyun.doubao.io.file.support.SincedbHandler;
 import com.liuyun.doubao.utils.StringUtils;
 
 public class FileInput implements Input {
@@ -83,8 +82,7 @@ public class FileInput implements Input {
 			}
 			
 			String hashKey = DigestUtils.md2Hex(filepath);
-			SincedbHandler sincedbHandler = new SincedbHandler(hashKey);
-			pathChangedProcessor.addSincedbHandler(hashKey, sincedbHandler);
+			pathChangedProcessor.addSincedbHandler(hashKey);
 			
 			FilePathWatcher pathWatcher = null;
 			if(this.pathWatcherMap.containsKey(start.toString())){
