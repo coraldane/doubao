@@ -48,11 +48,11 @@ public class PathChangeEventListener {
 		
 		String fileKey = FileUtils.getInodeAndDevice(child);
 		if("ENTRY_CREATE".equals(kind.name())){
-			this.fileReaderMap.get(fileKey).waitingForRead();
+			this.fileReaderMap.get(fileKey).notifyForRead();
 		} else if("ENTRY_MODIFY".equals(kind.name())){
 			String oldFileKey = this.fileKeyMap.get(child.toString());
 			if(fileKey.equals(oldFileKey)){
-				this.fileReaderMap.get(fileKey).waitingForRead();
+				this.fileReaderMap.get(fileKey).notifyForRead();
 			} else {
 				try {
 					this.fileKeyMap.put(child.toString(), fileKey);

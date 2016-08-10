@@ -15,13 +15,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.liuyun.doubao.processor.InputEventProcessor;
+import com.liuyun.doubao.input.InputEventProcessorAdapter;
 import com.liuyun.doubao.utils.DateUtils;
 import com.liuyun.doubao.utils.FileUtils;
 import com.liuyun.doubao.utils.StringUtils;
 import com.liuyun.doubao.utils.SysUtils;
 
-public class SingleFileReader extends InputEventProcessor {
+public class SingleFileReader extends InputEventProcessorAdapter {
 	
 	private static final int MAX_READ_LINES_PER_TIME = 1000;
 	

@@ -1,19 +1,19 @@
-package com.liuyun.doubao.processor;
+package com.liuyun.doubao.input;
 
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.liuyun.doubao.io.InputListener;
+import com.liuyun.doubao.processor.StopableThread;
 
-public abstract class InputEventProcessor extends StopableThread implements InputListener {
+public abstract class InputEventProcessorAdapter extends StopableThread implements InputListener {
 
 	protected volatile boolean ready = true;
 	protected volatile boolean waitForReading = true;
 	
 	@Override
-	public void waitingForRead() {
+	public void notifyForRead() {
 		this.ready = true;
 	}
 	

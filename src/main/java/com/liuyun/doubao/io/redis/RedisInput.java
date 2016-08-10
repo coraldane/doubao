@@ -8,13 +8,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.redis.RedisInputConfig;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.input.InputEventProcessorAdapter;
 import com.liuyun.doubao.io.Input;
-import com.liuyun.doubao.processor.InputEventProcessor;
 import com.liuyun.doubao.service.JedisService;
 
 import redis.clients.jedis.ShardedJedis;
 
-public class RedisInput extends InputEventProcessor implements Input {
+public class RedisInput extends InputEventProcessorAdapter implements Input {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
