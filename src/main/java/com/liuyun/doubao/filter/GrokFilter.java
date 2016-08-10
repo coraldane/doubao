@@ -8,9 +8,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.filter.DefaultFilterConfig;
 import com.liuyun.doubao.config.filter.GrokFilterConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.nflabs.grok.Grok;
-import com.nflabs.grok.GrokException;
-import com.nflabs.grok.Match;
+
+import oi.thekraken.grok.api.Grok;
+import oi.thekraken.grok.api.Match;
+import oi.thekraken.grok.api.exception.GrokException;
 
 public class GrokFilter extends DefaultFilter {
 	
@@ -18,7 +19,7 @@ public class GrokFilter extends DefaultFilter {
 	private static String[] NOT_USED_ARGS = new String[]{"BASE10NUM", "YEAR", "MONTHNUM", "MONTHDAY", "HOUR", "MINUTE", "SECOND", "ISO8601_TIMEZONE"};
 	
 	private GrokFilterConfig filterConfig = new GrokFilterConfig();
-	private Grok grok = new Grok();
+	private Grok grok = null;
 	
 	@Override
 	public boolean doFilter(JSONObject data) {
@@ -53,7 +54,7 @@ public class GrokFilter extends DefaultFilter {
 			this.filterConfig = (GrokFilterConfig)filterConfig;
 			
 			try {
-				grok.addPatternFromFile(DEFAULT_GROK_PATTERN_FILE_PATH);
+				grok = Grok.create(DEFAULT_GROK_PATTERN_FILE_PATH);
 				grok.compile(this.filterConfig.getMatchBean().getPattern());
 			} catch (GrokException e) {
 				e.printStackTrace();

@@ -4,28 +4,24 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.input.AbstractStopableDataReader;
 import com.liuyun.doubao.input.DataReaderFactory;
-import com.liuyun.doubao.utils.SysUtils;
+import com.liuyun.doubao.utils.ThreadUtils;
 
 public class FileReaderFactory implements DataReaderFactory {
+	
+	protected volatile boolean running = true;
 
-	private ExecutorService executor = Executors.newCachedThreadPool();
 	private Map<String, AbstractStopableDataReader> fileReaderMap = Maps.newConcurrentMap();
-	private Map<String, DataReadConsumer> consumerMap = Maps.newConcurrentMap();
 	private BlockingQueue<String> readyQueue = new LinkedBlockingQueue<String>();
 	
 	@Override
 	public void addReader(String key, AbstractStopableDataReader dataReader) {
 		this.fileReaderMap.put(key, dataReader);
-		DataReadConsumer consumer = new DataReadConsumer(dataReader);
-		this.consumerMap.put(key, consumer);
-		this.executor.submit(consumer);
 	}
 
 	@Override
@@ -35,11 +31,7 @@ public class FileReaderFactory implements DataReaderFactory {
 	
 	@Override
 	public void stop(boolean waitCompleted) {
-		for(DataReadConsumer consumer: this.consumerMap.values()){
-			consumer.stop();
-		}
-		
-		this.executor.shutdown();
+		this.running = false;
 		for(String key: this.fileReaderMap.keySet()){
 			AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
 			dataReader.stop(waitCompleted);
@@ -86,60 +78,26 @@ public class FileReaderFactory implements DataReaderFactory {
 
 	@Override
 	public void run() {
-		while(true){
+		while(this.running){
 			try {
 				String key = this.readyQueue.take();
 				
-				DataReadConsumer consumer = this.consumerMap.get(key);
-				if(null == consumer){
-					return;
-				}
-				consumer.setReady(true);
+				final AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
+				ThreadUtils.newThread(dataReader, new Function<AbstractStopableDataReader, Void>(){
+					@Override
+					public Void apply(AbstractStopableDataReader input) {
+						try {
+							dataReader.readData();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return null;
+					}
+					
+				});
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-	}
-	
-}
-
-class DataReadConsumer implements Runnable {
-	
-	protected volatile boolean running = true;
-	private volatile boolean ready = false;
-	protected volatile boolean readyForStop = false;
-	
-	private AbstractStopableDataReader dataReader = null;
-	
-	public DataReadConsumer(AbstractStopableDataReader dataReader){
-		this.dataReader = dataReader;
-	}
-	
-	@Override
-	public void run(){
-		while(running){
-			if(ready){
-				try {
-					this.dataReader.readData();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else {
-				SysUtils.sleep(100);
-			}
-		}
-		readyForStop = true;
-	}
-
-	public void setReady(boolean ready) {
-		this.ready = ready;
-	}
-
-	public void stop() {
-		this.dataReader.stop(false);
-		this.running = false;
-		while(!this.readyForStop){
-			SysUtils.sleep(100);
 		}
 	}
 	
