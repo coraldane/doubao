@@ -22,7 +22,7 @@ public class GrokFilter extends DefaultFilter {
 	private Grok grok = null;
 	
 	@Override
-	public boolean doFilter(JSONObject data) {
+	public boolean doFilter(JSONObject data) throws Exception {
 		String fieldName = this.filterConfig.getMatchBean().getFieldName();
 		if(StringUtils.isBlank(fieldName)){
 			return false;

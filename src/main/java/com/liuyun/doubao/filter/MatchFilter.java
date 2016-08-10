@@ -11,7 +11,7 @@ public class MatchFilter extends DefaultFilter {
 	private MatchFilterConfig filterConfig = new MatchFilterConfig();
 	
 	@Override
-	public boolean doFilter(JSONObject data) {
+	public boolean doFilter(JSONObject data) throws Exception {
 		Map<String, Object> patternMap = this.filterConfig.getPattern();
 		for(String key: patternMap.keySet()){
 			if(!patternMap.get(key).equals(data.get(key))){

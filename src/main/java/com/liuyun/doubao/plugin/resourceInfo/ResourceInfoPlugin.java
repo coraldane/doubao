@@ -26,7 +26,7 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 	}
 
 	@Override
-	public JSONObject doFilter(JSONObject data) {
+	public JSONObject doFilter(JSONObject data) throws Exception {
 		String strJson = data.getString("logger_message");
 		JSONObject taskInfo = JSON.parseObject(strJson);
 		if(null == taskInfo){

@@ -16,6 +16,6 @@ public interface Plugin {
 	 * @param data
 	 * @return 消息是否继续传递, true 是, false 否
 	 */
-	JSONObject doFilter(JSONObject data);
+	JSONObject doFilter(JSONObject data) throws Exception ;
 	
 }

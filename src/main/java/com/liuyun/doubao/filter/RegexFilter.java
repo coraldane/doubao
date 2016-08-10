@@ -11,7 +11,7 @@ public class RegexFilter extends DefaultFilter {
 	private RegexFilterConfig filterConfig = new RegexFilterConfig();
 
 	@Override
-	public boolean doFilter(JSONObject data) {
+	public boolean doFilter(JSONObject data) throws Exception {
 		Map<String, Object> patternMap = this.filterConfig.getPattern();
 		for(String key: patternMap.keySet()){
 			String patternValue = String.valueOf(patternMap.get(key));

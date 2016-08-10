@@ -24,7 +24,7 @@ public class DefaultPlugin implements Plugin {
 	}
 
 	@Override
-	public JSONObject doFilter(JSONObject data) {
+	public JSONObject doFilter(JSONObject data) throws Exception{
 		return data;
 	}
 	

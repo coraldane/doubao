@@ -44,20 +44,25 @@ public class FilterProcessor implements ClosableProcessor {
 	}
 	
 	@Override
-	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
+	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) {
 		JSONObject data = event.get();
 		boolean denied = false;
-		for(List<Filter> filterList: this.filters){
-			for(Filter filter: filterList){
-				JSONObject result = filter.doMatch(data);
-				if(null == result){
-					denied = true;
+		try {
+			for(List<Filter> filterList: this.filters){
+				for(Filter filter: filterList){
+					JSONObject result = filter.doMatch(data);
+					if(null == result){
+						denied = true;
+						break;
+					}
+				}
+				if(denied){
 					break;
 				}
 			}
-			if(denied){
-				break;
-			}
+		} catch (Exception e) {
+			denied = true;
+			logger.error("filter error", e);
 		}
 		if(false == denied){
 			Context.putData2Queue(this.context.getOutputQueue(), data);

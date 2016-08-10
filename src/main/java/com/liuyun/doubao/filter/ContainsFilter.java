@@ -14,7 +14,7 @@ public class ContainsFilter extends DefaultFilter {
 	private ContainsFilterConfig filterConfig = new ContainsFilterConfig();
 	
 	@Override
-	public boolean doFilter(JSONObject data) {
+	public boolean doFilter(JSONObject data) throws Exception {
 		if(StringUtils.isBlank(this.filterConfig.getField_name())){
 			return false;
 		}

@@ -40,7 +40,7 @@ public class TaskResultPlugin extends DefaultPlugin {
 	}
 
 	@Override
-	public JSONObject doFilter(JSONObject data) {
+	public JSONObject doFilter(JSONObject data) throws Exception {
 		data.remove("hostname");
 		data.remove("message");
 		

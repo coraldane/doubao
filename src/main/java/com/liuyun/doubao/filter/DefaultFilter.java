@@ -45,7 +45,7 @@ public abstract class DefaultFilter implements Filter {
 	}
 
 	@Override
-	public JSONObject doMatch(JSONObject data) {
+	public JSONObject doMatch(JSONObject data) throws Exception {
 		if(false == this.doFilter(data)){//如果不符合匹配规则，直接进入下一过滤器
 			return data;
 		}
@@ -73,5 +73,5 @@ public abstract class DefaultFilter implements Filter {
 	
 	public abstract DefaultFilterConfig getFilterConfig();
 
-	public abstract boolean doFilter(JSONObject data);
+	public abstract boolean doFilter(JSONObject data) throws Exception ;
 }
