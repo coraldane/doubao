@@ -112,7 +112,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		while(this.lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
 			this.fileHandler.position(this.lastOffset);
 			String newLine = this.readLine();
-			if(StringUtils.isEmpty(newLine)){
+			if(StringUtils.isBlank(newLine)){
 				continue;
 			}
 			retList.add(newLine);

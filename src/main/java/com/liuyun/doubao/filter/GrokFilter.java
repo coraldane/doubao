@@ -25,6 +25,7 @@ public class GrokFilter extends DefaultFilter {
 	public boolean doFilter(JSONObject data) throws Exception {
 		String fieldName = this.filterConfig.getMatchBean().getFieldName();
 		if(StringUtils.isBlank(fieldName)){
+			Context.addTag2Data(data, "_grokparsefailure");
 			return false;
 		}
 		String strMsg = data.getString(fieldName);
