@@ -14,7 +14,6 @@ import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.ctx.JsonEvent;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Filter;
-import com.liuyun.doubao.io.FilterResult;
 
 public class FilterProcessor implements ClosableProcessor {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -50,8 +49,8 @@ public class FilterProcessor implements ClosableProcessor {
 		boolean denied = false;
 		for(List<Filter> filterList: this.filters){
 			for(Filter filter: filterList){
-				FilterResult result = filter.doMatch(data);
-				if(false == result.isContinued()){
+				JSONObject result = filter.doMatch(data);
+				if(null == result){
 					denied = true;
 					break;
 				}

@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.PluginConfig;
-import com.liuyun.doubao.io.FilterResult;
 import com.liuyun.doubao.plugin.DefaultPlugin;
 import com.liuyun.doubao.utils.StringUtils;
 
@@ -27,22 +26,22 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 	}
 
 	@Override
-	public FilterResult filter(JSONObject data) {
+	public JSONObject doFilter(JSONObject data) {
 		String strJson = data.getString("logger_message");
 		JSONObject taskInfo = JSON.parseObject(strJson);
 		if(null == taskInfo){
-			return FilterResult.newDrop();
+			return null;
 		}
 		data.remove("logger_message");
 		
 		JSONObject paramsObj = taskInfo.getJSONObject("params");
 		if(null == paramsObj){
-			return FilterResult.newDrop();
+			return null;
 		}
 		
 		JSONArray urlArray = paramsObj.getJSONArray("resource_urls");
 		if(null == urlArray){
-			return FilterResult.newDrop();
+			return null;
 		}
 		data.put("resource_size", urlArray.size());
 		
@@ -73,7 +72,7 @@ public class ResourceInfoPlugin extends DefaultPlugin {
 		paramsObj.remove("resource_urls");
 		taskInfo.put("params", paramsObj);
 		data.put("task_info", taskInfo);
-		return FilterResult.newMatched(true);
+		return data;
 	}
 	
 	private String getDomainFromUrl(String strUrl){

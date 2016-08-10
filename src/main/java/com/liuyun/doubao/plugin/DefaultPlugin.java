@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.common.Plugin;
 import com.liuyun.doubao.config.PluginConfig;
-import com.liuyun.doubao.io.FilterResult;
 
 public class DefaultPlugin implements Plugin {
 	
@@ -25,8 +24,8 @@ public class DefaultPlugin implements Plugin {
 	}
 
 	@Override
-	public FilterResult filter(JSONObject data) {
-		return FilterResult.newNotMatch();
+	public JSONObject doFilter(JSONObject data) {
+		return data;
 	}
 	
 }

@@ -12,7 +12,6 @@ import com.liuyun.doubao.config.FilterConfig;
 import com.liuyun.doubao.config.filter.DefaultFilterConfig;
 import com.liuyun.doubao.extension.ExtensionLoader;
 import com.liuyun.doubao.io.Filter;
-import com.liuyun.doubao.io.FilterResult;
 
 public abstract class DefaultFilter implements Filter {
 	
@@ -46,12 +45,13 @@ public abstract class DefaultFilter implements Filter {
 	}
 
 	@Override
-	public FilterResult doMatch(JSONObject data) {
+	public JSONObject doMatch(JSONObject data) {
 		if(false == this.doFilter(data)){//如果不符合匹配规则，直接进入下一过滤器
-			return FilterResult.newNotMatch();
+			return data;
 		}
-		if(this.getFilterConfig().isDrop()){//直接丢弃
-			return FilterResult.newDrop();
+		
+		if(this.getFilterConfig().isDrop()){
+			return null;
 		}
 		
 		Map<String, Object> addedFieldMap = this.getFilterConfig().getAddedFieldMap();
@@ -64,9 +64,9 @@ public abstract class DefaultFilter implements Filter {
 		}
 		
 		if(StringUtils.isNotEmpty(this.getFilterConfig().getPluginName()) && null != this.plugin){
-			return this.plugin.filter(data);
+			return this.plugin.doFilter(data);
 		}
-		return FilterResult.newMatched(true);
+		return data;
 	}
 	
 	public abstract void setFilterConfig(DefaultFilterConfig filterConfig);

@@ -10,7 +10,7 @@ public interface Filter extends Closable {
 	
 	void init(FilterConfig FilterConfig);
 
-	FilterResult doMatch(JSONObject data);
+	JSONObject doMatch(JSONObject data);
 	
 	void setFilterConfig(DefaultFilterConfig filterConfig);
 	
