@@ -8,13 +8,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.redis.RedisInputConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.liuyun.doubao.input.InputEventProcessorAdapter;
 import com.liuyun.doubao.io.Input;
+import com.liuyun.doubao.processor.StopableThread;
 import com.liuyun.doubao.service.JedisService;
 
 import redis.clients.jedis.ShardedJedis;
 
-public class RedisInput extends InputEventProcessorAdapter implements Input {
+public class RedisInput extends StopableThread implements Input {
 	
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -28,13 +28,11 @@ public class RedisInput extends InputEventProcessorAdapter implements Input {
 	
 	@Override
 	public void init(InputConfig inputConfig, Context context){
-		super.setContext(context);
+		this.setContext(context);
 		if(inputConfig instanceof RedisInputConfig){
 			this.inputConfig = (RedisInputConfig)inputConfig;
 			
 			this.jedisService = new JedisService(this.inputConfig);
-			
-			this.start();
 		}
 	}
 
@@ -44,7 +42,7 @@ public class RedisInput extends InputEventProcessorAdapter implements Input {
 			this.jedisService.destroy();
 		}
 	}
-
+	
 	@Override
 	public boolean doTask(Context context) throws Exception {
 		long rowCount = 0;
@@ -57,7 +55,7 @@ public class RedisInput extends InputEventProcessorAdapter implements Input {
 					break;
 				}
 				JSONObject json = JSON.parseObject(text);
-				super.write(json);
+				Context.readData2Queue(this.context, json);
 				rowCount ++;
 			} catch (Exception e){
 				logger.error("read from redis error", e);
@@ -66,6 +64,11 @@ public class RedisInput extends InputEventProcessorAdapter implements Input {
 		
 		this.jedisService.returnRes(jedis);
 		return rowCount > 0;
+	}
+
+	@Override
+	public void startup(){
+		this.start();
 	}
 
 }

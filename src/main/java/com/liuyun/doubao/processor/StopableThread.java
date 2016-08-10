@@ -7,7 +7,7 @@ import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.io.Stopable;
 import com.liuyun.doubao.utils.SysUtils;
 
-public abstract class StopableThread implements Stopable {
+public abstract class StopableThread extends Thread implements Stopable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	protected static final int DEFAULT_POLL_TIMEOUT = 3;
@@ -21,8 +21,9 @@ public abstract class StopableThread implements Stopable {
 	public void setContext(Context context) {
 		this.context = context;
 	}
-
-	public void start(){
+	
+	@Override
+	public void run(){
 		try{
 			while(running || continued){
 				boolean result = doTask(this.context);

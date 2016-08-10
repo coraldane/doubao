@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,17 +12,15 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.InputConfig;
 import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.io.Input;
 import com.liuyun.doubao.io.file.support.FilePathWatcher;
-import com.liuyun.doubao.io.file.support.PathChangeEventListener;
+import com.liuyun.doubao.io.file.support.PathChangedEventProcessor;
 import com.liuyun.doubao.io.file.support.PathResolver;
 import com.liuyun.doubao.io.file.support.SincedbHandler;
-import com.liuyun.doubao.io.file.support.SingleFileReader;
 import com.liuyun.doubao.utils.StringUtils;
 
 public class FileInput implements Input {
@@ -32,24 +29,42 @@ public class FileInput implements Input {
 	
 	private ExecutorService pathWatchExecutor = Executors.newCachedThreadPool();
 	
-	private List<FilePathWatcher> pathWatcherList = Lists.newArrayList();
-	private Map<String, SincedbHandler> sincedbHandlerMap = Maps.newConcurrentMap();
-	private Map<String, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
+	private Map<String, FilePathWatcher> pathWatcherMap = Maps.newConcurrentMap();
 	
+	private PathChangedEventProcessor pathChangedProcessor;
 	private FileInputConfig inputConfig = null;
 	private Context context = null;
 	
 	@Override
 	public void init(InputConfig inputConfig, Context context) {
 		this.context = context;
+		this.pathChangedProcessor = new PathChangedEventProcessor(this.context);
 		if(inputConfig instanceof FileInputConfig){
 			this.inputConfig = (FileInputConfig)inputConfig;
-			
-			try {
-				this.registerPathWatcher();
-			} catch (IOException e) {
-				logger.error("register watcher error", e);
-			}
+		}
+	}
+	
+	@Override
+	public void destroy() {
+		for(FilePathWatcher pathWatcher: this.pathWatcherMap.values()){
+			pathWatcher.destroy();
+		}
+		this.pathWatchExecutor.shutdown();
+		
+		this.pathChangedProcessor.destroy();
+	}
+	
+	@Override
+	public void stop(boolean waitCompleted){
+		this.pathChangedProcessor.stop(waitCompleted);
+	}
+
+	@Override
+	public void startup() {
+		try {
+			this.registerPathWatcher();
+		} catch (IOException e) {
+			logger.error("register watcher error", e);
 		}
 	}
 	
@@ -68,42 +83,22 @@ public class FileInput implements Input {
 			}
 			
 			String hashKey = DigestUtils.md2Hex(filepath);
+			SincedbHandler sincedbHandler = new SincedbHandler(hashKey);
+			pathChangedProcessor.addSincedbHandler(hashKey, sincedbHandler);
 			
-			SincedbHandler sincedbHandler = new SincedbHandler(hashKey, inputConfig);
-			PathChangeEventListener eventListener = new PathChangeEventListener(this.context, sincedbHandler, this.fileReaderMap);
-			FilePathWatcher pathWatcher = new FilePathWatcher(start, filepath, this.inputConfig, eventListener);
-			
-			this.pathWatcherList.add(pathWatcher);
-			this.sincedbHandlerMap.put(hashKey, sincedbHandler);
-			
+			FilePathWatcher pathWatcher = null;
+			if(this.pathWatcherMap.containsKey(start.toString())){
+				pathWatcher = this.pathWatcherMap.get(start.toString());
+			} else {
+				pathWatcher = new FilePathWatcher(start, this.inputConfig, pathChangedProcessor);
+			}
+			pathWatcher.addFileMatcher(hashKey, filepath);
+			this.pathWatcherMap.put(start.toString(), pathWatcher);
+		}
+		
+		for(FilePathWatcher pathWatcher: this.pathWatcherMap.values()){
+			pathWatcher.startup();
 			this.pathWatchExecutor.submit(pathWatcher);
-		}
-	}
-	
-	@Override
-	public void destroy() {
-		for(FilePathWatcher pathWatcher: this.pathWatcherList){
-			pathWatcher.destroy();
-		}
-		this.pathWatchExecutor.shutdown();
-		
-		//close file channel
-		for(SingleFileReader fileReader: this.fileReaderMap.values()){
-			fileReader.destroy();
-		}
-		
-		for(SincedbHandler handler: this.sincedbHandlerMap.values()){
-			handler.flush();
-		}
-	}
-	
-	@Override
-	public void stop(boolean waitCompleted){
-		for(SingleFileReader fileReader: this.fileReaderMap.values()){
-			fileReader.stop(false);
-		}
-		for(SingleFileReader fileReader: this.fileReaderMap.values()){
-			fileReader.waitForStoped();
 		}
 	}
 

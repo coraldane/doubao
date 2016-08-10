@@ -15,13 +15,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.ctx.Context;
-import com.liuyun.doubao.input.InputEventProcessorAdapter;
+import com.liuyun.doubao.input.AbstractStopableDataReader;
 import com.liuyun.doubao.utils.DateUtils;
 import com.liuyun.doubao.utils.FileUtils;
 import com.liuyun.doubao.utils.StringUtils;
 import com.liuyun.doubao.utils.SysUtils;
 
-public class SingleFileReader extends InputEventProcessorAdapter {
+public class SingleFileReader extends AbstractStopableDataReader {
 	
 	private static final int MAX_READ_LINES_PER_TIME = 1000;
 	
@@ -34,7 +34,7 @@ public class SingleFileReader extends InputEventProcessorAdapter {
 	private MessageBean messageBean = new MessageBean();
 	
 	public SingleFileReader(Context context, Path path, SincedbHandler sincedbHandler) throws IOException {
-		super.setContext(context);
+		this.setContext(context);
 		this.fileKey = FileUtils.getInodeAndDevice(path);
 		this.sincedbHandler = sincedbHandler;
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
@@ -45,8 +45,7 @@ public class SingleFileReader extends InputEventProcessorAdapter {
 	
 	private void init(){
 		this.messageBean.setHost(SysUtils.getHostName());
-		
-		FileInputConfig inputConfig = this.sincedbHandler.getFileInputConfig();
+		FileInputConfig inputConfig = (FileInputConfig)this.context.getConfig().getInput();
 		try {
 			long offset = 0;
 			if("end".equals(inputConfig.getStartPosition())){
@@ -63,23 +62,30 @@ public class SingleFileReader extends InputEventProcessorAdapter {
 	}
 	
 	@Override
-	public boolean doTask(Context context) throws Exception {
-		List<String> strLineList = null;
-		if(ready){
-			this.ready = false;
-			this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
-			long newOffset = this.fileHandler.size();
-			
-			strLineList = this.readLines(newOffset);
-		} else if(waitForReading){
-			long newOffset = this.sincedbHandler.getOffset(this.fileKey);
-			strLineList = this.readLines(newOffset);
-		} else {
-			return false;
+	public void readData() throws IOException {
+		this.setReadyForStop(false);
+		while(ready || waitForReading){
+			List<String> strLineList = null;
+			if(ready){
+				this.ready = false;
+				this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
+				long newOffset = this.fileHandler.size();
+				
+				strLineList = this.readLines(newOffset);
+			} else if(waitForReading){
+				long newOffset = this.sincedbHandler.getOffset(this.fileKey);
+				strLineList = this.readLines(newOffset);
+			} else {
+				break;
+			}
+			this.writeData(strLineList);
 		}
-		
+		this.setReadyForStop(true);
+	}
+	
+	private void writeData(List<String> strLineList){
 		if(CollectionUtils.isNotEmpty(strLineList)){
-			FileInputConfig fileInputConfig = this.sincedbHandler.getFileInputConfig();
+			FileInputConfig fileInputConfig = (FileInputConfig)this.context.getConfig().getInput();
 			for(String strLine: strLineList){
 				JSONObject json = new JSONObject();
 				json.put("@timestamp", DateUtils.formatNow(DateUtils.DATE_FORMAT_ISO8601));
@@ -92,10 +98,9 @@ public class SingleFileReader extends InputEventProcessorAdapter {
 					json.put("tags", fileInputConfig.getTags());
 				}
 				json.put("message", strLine);
-				super.write(json);
+				Context.readData2Queue(context, json);
 			}
 		}
-		return true;
 	}
 	
 	private List<String> readLines(long newOffset) throws IOException{

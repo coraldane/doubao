@@ -9,4 +9,5 @@ public interface Input extends Closable, Stopable {
 	
 	void init(InputConfig inputConfig, Context context);
 	
+	void startup();
 }

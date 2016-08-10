@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.common.Configuration;
-import com.liuyun.doubao.config.file.FileInputConfig;
 import com.liuyun.doubao.utils.StringUtils;
 
 public class SincedbHandler implements Runnable {
@@ -33,23 +32,17 @@ public class SincedbHandler implements Runnable {
 	private static final String SINCEDB_DATA_DELIMITER = ",";
 	
 	private String hashKey = null;
-	private FileInputConfig fileInputConfig = null;
 	
 	private Path dataFolder = null;
 	private Map<String, Long> offsetMap = Maps.newConcurrentMap();
 
-	public SincedbHandler(String hash, FileInputConfig inputConfig) throws IOException{
+	public SincedbHandler(String hash) throws IOException{
 		this.hashKey = hash;
-		this.fileInputConfig = inputConfig;
 		this.initialFromDisk();
 		
 		executorService.scheduleAtFixedRate(this, 3, DEFAULT_INTERVAL, TimeUnit.SECONDS);
 	}
 	
-	public FileInputConfig getFileInputConfig() {
-		return fileInputConfig;
-	}
-
 	public long getOffset(String fileKey){
 		if(this.offsetMap.containsKey(fileKey)){
 			return this.offsetMap.get(fileKey);

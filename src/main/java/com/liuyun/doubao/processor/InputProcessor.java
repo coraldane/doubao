@@ -33,23 +33,24 @@ public class InputProcessor implements InitializingBean, Stopable {
 		}
 		
 		this.input = loader.createExtensionByIdentified(inputConfig.getClass().getAnnotation(Identified.class));
-		if (null != this.input) {
-			this.input.init(inputConfig, context);
+		if (null == this.input) {
+			throw new RuntimeException("initial Input error");
 		}
+		this.input.init(inputConfig, context);
 	}
-
+	
 	@Override
 	public void destroy(Context context) {
-		if (null != this.input) {
-			this.input.destroy();
-		}
+		this.input.destroy();
+	}
+	
+	public void start(){
+		this.input.startup();
 	}
 
 	@Override
 	public void stop(boolean waitCompleted) {
-		if (null != this.input) {
-			this.input.stop(false);
-		}
+		this.input.stop(false);
 	}
 
 }

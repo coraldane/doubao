@@ -25,8 +25,8 @@ public class DefaultChannel implements Channel {
 
 	private Context context = null;
 
-	private InputProcessor inputEventHandler = null;
-	private List<InitializingBean> handlerList = Lists.newArrayList();
+	private InputProcessor inputProcessor = null;
+	private List<InitializingBean> processorList = Lists.newArrayList();
 
 	@Override
 	public void setConfig(DoubaoConfig config) {
@@ -35,32 +35,33 @@ public class DefaultChannel implements Channel {
 
 	@Override
 	public void start() {
-		ClosableProcessor filterHandler = new FilterProcessor();
-		this.addHandler(filterHandler, this.context);
-		this.context.setFilterQueue(this.makeRingBuffer(new EventHandler[]{filterHandler}));
+		ClosableProcessor filterProcessor = new FilterProcessor();
+		this.addHandler(filterProcessor, this.context);
+		this.context.setFilterQueue(this.makeRingBuffer(new EventHandler[]{filterProcessor}));
 		
 		OutputHolder outputHolder = new OutputHolder();
 		this.addHandler(outputHolder, this.context);
 		this.context.setOutputQueue(this.makeRingBuffer(outputHolder.getOutputEventHandlers()));
 		
-		this.inputEventHandler = new InputProcessor();
-		this.inputEventHandler.init(this.context);
+		this.inputProcessor = new InputProcessor();
+		this.inputProcessor.init(this.context);
+		this.inputProcessor.start();
 	}
-
+	
 	@Override
 	public void stop() {
-		this.inputEventHandler.stop(false);
+		this.inputProcessor.stop(false);
 		this.context.stop();
 		
-		this.inputEventHandler.destroy(this.context);
-		for(InitializingBean handler: this.handlerList){
-			handler.destroy(this.context);
+		this.inputProcessor.destroy(this.context);
+		for(InitializingBean processor: this.processorList){
+			processor.destroy(this.context);
 		}
 	}
 	
 	private void addHandler(InitializingBean handler, Context context){
 		handler.init(context);
-		this.handlerList.add(handler);
+		this.processorList.add(handler);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

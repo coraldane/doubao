@@ -10,28 +10,32 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.ctx.Context;
+import com.liuyun.doubao.io.Closable;
+import com.liuyun.doubao.io.Stopable;
 import com.liuyun.doubao.utils.FileUtils;
 
-public class PathChangeEventListener {
+public class PathChangedEventProcessor implements Closable, Stopable {
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private Context context = null;
-	private Map<String, SingleFileReader> fileReaderMap = null;
+	private Map<String, SingleFileReader> fileReaderMap = Maps.newConcurrentMap();
 	private Map<String, String> fileKeyMap = Maps.newConcurrentMap();
-	private SincedbHandler sincedbHandler = null;
+	private Map<String, String> hashKeyMap = Maps.newConcurrentMap();
+	private Map<String, SincedbHandler> sincedbHandlerMap = Maps.newConcurrentMap();
 	
-	public PathChangeEventListener(Context context, SincedbHandler handler, Map<String, SingleFileReader> fileReaderMap){
+	public PathChangedEventProcessor(Context context){
 		this.context = context;
-		this.sincedbHandler = handler;
-		this.fileReaderMap = fileReaderMap;
 	}
 	
-	public void addFileReader(Path path) throws IOException {
+	public void addSincedbHandler(String hashKey, SincedbHandler handler){
+		this.sincedbHandlerMap.put(hashKey, handler);
+	}
+	
+	public void addFileReader(String hashKey, Path path) throws IOException {
 		logger.debug("register file: {}", path.toString());
-		if(null == this.fileReaderMap){
-			this.fileReaderMap = Maps.newConcurrentMap();
-		}
+		this.hashKeyMap.put(path.toString(), hashKey);
+		
 		String fileKey = FileUtils.getInodeAndDevice(path);
 		if(!this.fileReaderMap.containsKey(fileKey)){
 			SingleFileReader fileReader = new SingleFileReader(context, path, sincedbHandler);
@@ -67,6 +71,32 @@ public class PathChangeEventListener {
 		} else if("ENTRY_DELETE".equals(kind.name())){
 			this.sincedbHandler.removeFile(fileKey);
 			this.fileReaderMap.get(fileKey).destroy();
+		}
+	}
+	
+	private SincedbHandler getSincedbHandler(Path child) {
+		if(this.hashKeyMap.containsKey(child.toString())){
+			
+		}
+		return null;
+	}
+
+	@Override
+	public void stop(boolean waitCompleted) {
+		for(SingleFileReader fileReader: this.fileReaderMap.values()){
+			fileReader.stop(true);
+		}
+	}
+
+	@Override
+	public void destroy() {
+		//close file channel
+		for(SingleFileReader fileReader: this.fileReaderMap.values()){
+			fileReader.destroy();
+		}
+		
+		for(SincedbHandler handler: this.sincedbHandlerMap.values()){
+			handler.flush();
 		}
 	}
 	

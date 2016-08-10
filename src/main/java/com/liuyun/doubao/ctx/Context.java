@@ -1,11 +1,13 @@
 package com.liuyun.doubao.ctx;
 
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.DoubaoConfig;
+import com.liuyun.doubao.config.InputConfig;
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.RingBuffer;
 
@@ -84,5 +86,16 @@ public class Context {
 			tagList.add(tag);
 		}
 		data.put("tags", tagList);
+	}
+	
+	public static void readData2Queue(Context context, JSONObject json){
+		InputConfig inputConfig = context.getConfig().getInput();
+		Map<String, Object> addedFieldMap = inputConfig.getAddedFieldMap();
+		if(null != addedFieldMap && !addedFieldMap.isEmpty()){
+			for(String key: addedFieldMap.keySet()){
+				json.put(key, addedFieldMap.get(key));
+			}
+		}
+		Context.putData2Queue(context.getFilterQueue(), json);
 	}
 }

@@ -19,14 +19,15 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.liuyun.doubao.config.file.FileInputConfig;
 
 public class FilePathWatcher implements Runnable {
@@ -34,40 +35,44 @@ public class FilePathWatcher implements Runnable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final WatchService watcher;
-	private final Map<WatchKey, Path> keys;
-	private final PathMatcher pathMatcher;
+	private final Map<WatchKey, Path> keys = Maps.newConcurrentMap();
+	private final Map<String, PathMatcher> pathMatcherMap = Maps.newConcurrentMap();
 	private final List<PathMatcher> excludePathMatchers = Lists.newArrayList();
 	
-	private PathChangeEventListener eventListener = null;
+	private PathChangedEventProcessor pathChangedProcessor = null;
 	private FileInputConfig fileInputConfig = null;
-
-	public FilePathWatcher(Path path, String glob, FileInputConfig inputConfig,
-			PathChangeEventListener eventListener) throws IOException {
+	private Path watchPath = null;
+	
+	public FilePathWatcher(Path start, FileInputConfig inputConfig, 
+			PathChangedEventProcessor eventProcessor) throws IOException {
 		this.watcher = FileSystems.getDefault().newWatchService();
-		this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
 		
-		this.keys = new HashMap<WatchKey, Path>();
+		this.watchPath = start;
 		this.fileInputConfig = inputConfig;
-		this.eventListener = eventListener;
-
-		final Path topDir = path;
+		this.pathChangedProcessor = eventProcessor;
 		
 		if(null != this.fileInputConfig.getExclude()){
 			for(String exclude: this.fileInputConfig.getExclude()){
 				this.excludePathMatchers.add(FileSystems.getDefault().getPathMatcher("glob:" + exclude));
 			}
 		}
-		
-		this.initMatcher(topDir, glob, this.fileInputConfig.isRecursive());
+	}
+	
+	public void addFileMatcher(String hashKey, String filepath){
+		this.pathMatcherMap.put(hashKey, FileSystems.getDefault().getPathMatcher("glob:" + filepath));
+	}
+	
+	public void startup() throws IOException{
+		this.initMatcher(this.watchPath, this.fileInputConfig.isRecursive());
 
 		if (this.fileInputConfig.isRecursive()) {
-			registerAll(path);
+			registerAll(this.watchPath);
 		} else {
-			register(path);
+			register(this.watchPath);
 		}
 	}
 
-	private void initMatcher(final Path start, String glob, final boolean recursive) throws IOException {
+	private void initMatcher(final Path start, final boolean recursive) throws IOException {
 		Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -78,9 +83,10 @@ public class FilePathWatcher implements Runnable {
 			}
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				if(matchPath(file)){
-					eventListener.addFileReader(file);
+			public FileVisitResult visitFile(Path child, BasicFileAttributes attrs) throws IOException {
+				String hashKey = matchPath(child);
+				if(StringUtils.isNotBlank(hashKey)){
+					pathChangedProcessor.addFileReader(hashKey, child);
 				}
 				return FileVisitResult.CONTINUE;
 			}
@@ -117,17 +123,26 @@ public class FilePathWatcher implements Runnable {
 		}
 	}
 	
-	private boolean matchPath(Path file) throws IOException{
-		boolean bAllow = false;
+	/**
+	 * 
+	 * @param file
+	 * @return 匹配的grob表达式的Hash值
+	 * @throws IOException
+	 */
+	private String matchPath(Path file) throws IOException{
 		for(PathMatcher excludePathMatcher: excludePathMatchers){
 			if(excludePathMatcher.matches(file)){
-				return false;
+				return null;
 			}
 		}
-		if (pathMatcher.matches(file)) {
-			bAllow = true;
+		
+		for(String key: this.pathMatcherMap.keySet()){
+			PathMatcher pathMatcher = this.pathMatcherMap.get(key);
+			if(pathMatcher.matches(file)){
+				return key;
+			}
 		}
-		return bAllow;
+		return null;
 	}
 
 	/**
@@ -167,7 +182,7 @@ public class FilePathWatcher implements Runnable {
 				// register it and its sub-directories
 				this.registerSubDirectories(kind, child);
 				
-				this.eventListener.handleEvent(event.kind(), child);
+				this.pathChangedProcessor.handleEvent(event.kind(), child);
 			}
 
 			// reset key and remove from set if directory no longer accessible
@@ -188,8 +203,11 @@ public class FilePathWatcher implements Runnable {
 			try {
 				if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
 					registerAll(child);
-				} else if (matchPath(child)) {
-					eventListener.addFileReader(child);
+				} else {
+					String hashKey = this.matchPath(child);
+					if(StringUtils.isNotBlank(hashKey)){
+						pathChangedProcessor.addFileReader(hashKey, child);
+					}
 				}
 			} catch (IOException x) {
 				// ignore to keep sample readbale
