@@ -1,6 +1,6 @@
 package com.liuyun.doubao.ctx;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,18 +116,20 @@ public class Context {
 		return null;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Object getProperty(Object instance, String fieldName) {
 		if(null == instance){
 			return null;
 		}
 		try{
 			Class clazz = instance.getClass();
-			Field field = clazz.getField(fieldName);
-			return field.get(instance);
+			String methodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+			Method method = clazz.getMethod(methodName);
+			return method.invoke(instance);
 		}	catch(Exception e){
-			
+			e.printStackTrace();
 		}
 		return null;
 	}
+	
 }

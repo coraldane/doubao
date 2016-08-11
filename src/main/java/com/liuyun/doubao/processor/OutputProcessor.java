@@ -2,6 +2,7 @@ package com.liuyun.doubao.processor;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ import com.lmax.disruptor.EventHandler;
 public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private static final long FLUSH_DATA_INTERVAL = 3000;
+	private static final long FLUSH_DATA_INTERVAL = 1000;
 	
 	private Output output = null;
 	private OutputConfig outputConfig = null;
@@ -63,8 +64,10 @@ public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 	public void run(){
 		while(true){
 			if(this.dataBuffer.size() >= this.batchSize || lastWriteTime + FLUSH_DATA_INTERVAL < System.currentTimeMillis()){
-				this.flushData(this.dataBuffer);
-				this.dataBuffer.clear();
+				if(CollectionUtils.isNotEmpty(this.dataBuffer)){
+					this.flushData(this.dataBuffer);
+					this.dataBuffer.clear();
+				}
 				
 				lastWriteTime = System.currentTimeMillis();
 			} else {
@@ -85,7 +88,7 @@ public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 			String compressed = this.compression.compress(source);
 			this.output.writeCompressedData(compressed);
 		} catch(Exception e){
-			logger.error("compress data error, source: {}", source, e);
+			logger.error("compress data error, source: " + source, e);
 		}
 	}
 	
