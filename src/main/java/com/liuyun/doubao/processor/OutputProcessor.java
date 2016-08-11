@@ -37,11 +37,15 @@ public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 
 	@Override
 	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) throws Exception {
+		JSONObject json = event.get();
+		if(null == json || json.isEmpty()){
+			return;
+		}
+		
 		while(this.dataBuffer.size() >= this.batchSize){
 			SysUtils.sleep(100);
 		}
-		
-		this.dataBuffer.add(event.get());
+		this.dataBuffer.add(json);
 	}
 	
 	@Override

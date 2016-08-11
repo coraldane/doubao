@@ -56,22 +56,26 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		
 		SincedbHandler sincedbHandler = this.getSincedbHandler(child);
-		String fileKey = FileUtils.getInodeAndDevice(child);
-		if("ENTRY_CREATE".equals(kind.name())){
-			this.dataReaderFactory.notifyForRead(fileKey);
-		} else if("ENTRY_MODIFY".equals(kind.name())){
-			String oldFileKey = this.fileKeyMap.get(child.toString());
-			if(fileKey.equals(oldFileKey)){
-				this.dataReaderFactory.notifyForRead(fileKey);
-			} else {
-				this.fileKeyMap.put(child.toString(), fileKey);
-				logger.debug("file has changed, path: {}", child.toString());
-				this.dataReaderFactory.resetReader(oldFileKey, fileKey, child);
-			}
-		} else if("ENTRY_DELETE".equals(kind.name())){
+		if("ENTRY_DELETE".equals(kind.name())){
+			String fileKey = this.fileKeyMap.get(child.toString());
 			sincedbHandler.removeFile(fileKey);
 			this.dataReaderFactory.destroy(fileKey);
+			return;
 		}
+		
+		String newFileKey = FileUtils.getInodeAndDevice(child);
+		if("ENTRY_CREATE".equals(kind.name())){
+			this.dataReaderFactory.notifyForRead(newFileKey);
+		} else if("ENTRY_MODIFY".equals(kind.name())){
+			String oldFileKey = this.fileKeyMap.get(child.toString());
+			if(newFileKey.equals(oldFileKey)){
+				this.dataReaderFactory.notifyForRead(newFileKey);
+			} else {
+				this.fileKeyMap.put(child.toString(), newFileKey);
+				logger.debug("file has changed, path: {}", child.toString());
+				this.dataReaderFactory.resetReader(oldFileKey, newFileKey, child);
+			}
+		} 
 	}
 	
 	private SincedbHandler getSincedbHandler(Path child) {

@@ -44,9 +44,6 @@ public class RedisOutput implements Output {
 		
 		for(int index=0; index < dataArray.size(); index++){
 			JSONObject data = dataArray.get(index);
-			if(null == data){
-				continue;
-			}
 			try{
 				jedis.rpush(this.outputConfig.getKey(), data.toJSONString());
 				success ++;

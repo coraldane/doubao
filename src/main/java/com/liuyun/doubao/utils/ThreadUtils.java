@@ -10,10 +10,15 @@ import com.google.common.base.Function;
 
 /**
  * 
- * @Date: 2014年3月12日 下午10:07:34<br>
- * @Copyright (c) 2014 udai.com <br> * 
- * @since 1.0
- * @author coral
+* @Description: 
+* @version: v1.0.0
+* @author: coral
+* @date: Aug 11, 2016 11:03:25 AM
+* @copyright liutian
+* Modification History:
+* Date         Author          Version            Description
+*---------------------------------------------------------*
+* Aug 11, 2016      coral          v1.0.0
  */
 public class ThreadUtils {
 	
@@ -23,7 +28,7 @@ public class ThreadUtils {
 				@Override
 				public Thread newThread(Runnable r) {
 					Thread thread = new Thread(r);
-					thread.setName("sms-sender");
+					thread.setName("thread-executor");
 					return thread;
 				}
 			}, new DiscardOldestPolicy());// 旧的自动放弃
@@ -46,13 +51,4 @@ public class ThreadUtils {
 		}
 	}
 
-	public static void sleep(long ms){
-		if(ms<0){
-			return;
-		}
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {
-		}
-	}
 }

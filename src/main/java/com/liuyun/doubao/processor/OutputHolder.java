@@ -39,7 +39,7 @@ public class OutputHolder implements InitializingBean {
 			
 			if(null != output){
 				output.init(outputConfig);
-				OutputProcessor thread = new OutputProcessor(output, outputConfig.getBatchSize());
+				OutputProcessor thread = new OutputProcessor(output, outputConfig.getBatch_size());
 				this.outputEventHandlers.add(thread);
 				executor.submit(thread);
 			}

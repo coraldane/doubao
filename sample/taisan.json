@@ -1,35 +1,49 @@
 {
-	"input": {
-		"redis": {
-			"host": "elastic.ops.vobile.org",
-			"passwd": "******",
-			"key": "logstash-taisan-origin"
-		}
-	},
-	"filter": [
-		{
-			"match": {
-				"pattern": {
-					"logger_title": "TASK ENDS",
-					"log_level": "DEBUG"
-				},
-				"plugin": {
-					"name": "taskResultPlugin",
-					"params": {
-						"redis_host": "elastic.ops.vobile.org",
-						"redis_port": 6379,
-						"redis_passwd": "******",
-						"redis_key": "task_result_buffer"
-					}
-				}
-			}
-		}
-	],
-	"output": {
-		"redis": {
-			"host": "elastic.ops.vobile.org",
-			"passwd": "******",
-			"key": "logstash-taisan-dest"
-		}
-	}
+  "input": {
+    "file": {
+      "path": ["/vobiledata/locallog/vobile.log"],
+      "type": "taisan"
+    }
+  },
+  "filter": [
+    {
+      "grok": {
+        "match": {
+          "field_name": "message",
+          "pattern": "%{SYSLOGTIMESTAMP:time_local} %{SYSLOGHOST:hostname} %{DATA:process}: \\[.*\\] TID %{NUMBER:tid} \\[%{GREEDYDATA:file_name}:%{NUMBER:file_pos}:%{WORD:method}\\] \\[%{WORD:log_level}\\] (?<logger_title>TASK ENDS)(, part %{NUMBER:logger_index}: )? \\[(?<task_message>.*)\\]"
+        },
+        "remove_fields": ["message"]
+      },
+      "contains": {
+        "field_name": "tags",
+        "contains_value": "_grokparsefailure",
+        "drop": true
+      }
+    },
+    {
+      "match": {
+        "pattern": {
+          "logger_title": "TASK ENDS",
+          "log_level": "DEBUG"
+        },
+        "plugin": {
+          "name": "taskResultPlugin",
+          "params": {
+            "redis_host": "elastic.ops.vobile.org",
+            "redis_port": 6379,
+            "redis_passwd": "Risdoav9",
+            "redis_key": "task_result_buffer"
+          }
+        },
+        "remove_fields": ["task_message"]
+      }
+    }
+  ],
+  "output": {
+    "redis": {
+      "host": "elastic.ops.vobile.org",
+      "passwd": "Risdoav9",
+      "key": "logstash-taisan-dest"
+    }
+  }
 }

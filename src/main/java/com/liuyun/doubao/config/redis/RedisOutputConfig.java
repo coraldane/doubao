@@ -9,7 +9,10 @@ public class RedisOutputConfig extends RedisConfig implements OutputConfig {
 	private static final int BATCH_SIZE_DEFAULT = 100;
 
 	private String key;
-	private int batchSize = BATCH_SIZE_DEFAULT;
+	private int batch_size = BATCH_SIZE_DEFAULT;
+	
+	/** one of ["none", "gzip"] */
+	private String compression_type = "none";
 	
 	public String getKey() {
 		return key;
@@ -17,23 +20,17 @@ public class RedisOutputConfig extends RedisConfig implements OutputConfig {
 	public void setKey(String key) {
 		this.key = key;
 	}
-	
-	@Override
-	public int getBatchSize() {
-		return batchSize;
+	public int getBatch_size() {
+		return batch_size;
+	}
+	public void setBatch_size(int batch_size) {
+		this.batch_size = batch_size;
+	}
+	public String getCompression_type() {
+		return compression_type;
+	}
+	public void setCompression_type(String compression_type) {
+		this.compression_type = compression_type;
 	}
 	
-	public void setBatchSize(int batchSize) {
-		this.batchSize = batchSize;
-	}
-
-	private String name;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 }

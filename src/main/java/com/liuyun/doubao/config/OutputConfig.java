@@ -5,6 +5,6 @@ import com.liuyun.doubao.extension.SPI;
 @SPI
 public interface OutputConfig {
 
-	int getBatchSize();
+	int getBatch_size();
 	
 }

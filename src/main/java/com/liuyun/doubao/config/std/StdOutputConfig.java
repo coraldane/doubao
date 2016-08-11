@@ -8,25 +8,14 @@ public class StdOutputConfig implements OutputConfig {
 
 	private static final int BATCH_SIZE_DEFAULT = 10;
 
-	private int batchSize = BATCH_SIZE_DEFAULT;
-	
-	@Override
-	public int getBatchSize() {
-		return batchSize;
-	}
-	
-	public void setBatchSize(int batchSize) {
-		this.batchSize = batchSize;
-	}
-	
-	private String name;
+	private int batch_size = BATCH_SIZE_DEFAULT;
 
-	public String getName() {
-		return name;
+	public int getBatch_size() {
+		return batch_size;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setBatch_size(int batch_size) {
+		this.batch_size = batch_size;
 	}
-
+	
 }
