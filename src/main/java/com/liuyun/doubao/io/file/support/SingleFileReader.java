@@ -100,7 +100,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 					json.put("tags", fileInputConfig.getTags());
 				}
 				json.put("message", strLine);
-				Context.readData2Queue(context, json);
+				context.readData2Queue(json);
 			}
 		}
 	}
@@ -109,9 +109,12 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		List<String> retList = Lists.newArrayList();
 		
 		int lineCount = 0;
+		long bytesCount = 0L;
 		while(this.lastOffset < newOffset && lineCount < MAX_READ_LINES_PER_TIME){
+			long oldOffset = this.lastOffset;
 			this.fileHandler.position(this.lastOffset);
 			String newLine = this.readLine();
+			bytesCount += this.lastOffset - oldOffset;
 			if(StringUtils.isBlank(newLine)){
 				continue;
 			}
@@ -126,6 +129,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 			this.sincedbHandler.setOffset(this.fileKey, lastOffset);
 			this.waitForReading = false;
 		}
+		this.context.getDataStatRepository().incrementDataRead(lineCount, bytesCount);
 		
 		return retList;
 	}

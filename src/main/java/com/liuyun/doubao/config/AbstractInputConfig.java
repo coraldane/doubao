@@ -2,24 +2,22 @@ package com.liuyun.doubao.config;
 
 import java.util.Map;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.Maps;
 
 public abstract class AbstractInputConfig implements InputConfig {
 	
-	@JSONField(name="add_field")
-	private Map<String, Object> addedFieldMap = Maps.newConcurrentMap();
+	private Map<String, Object> add_field = Maps.newConcurrentMap();
 	
 	@Override
-	public void setAddedFieldMap(Map<String, Object> fieldsMap) {
+	public void setAdd_field(Map<String, Object> fieldsMap) {
 		if(null != fieldsMap){
-			this.addedFieldMap = fieldsMap;
+			this.add_field = fieldsMap;
 		}
 	}
 
 	@Override
-	public Map<String, Object> getAddedFieldMap() {
-		return this.addedFieldMap;
+	public Map<String, Object> getAdd_field() {
+		return this.add_field;
 	}
 
 }

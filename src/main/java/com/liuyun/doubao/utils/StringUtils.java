@@ -168,7 +168,7 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
 				StringBuffer buffer = new StringBuffer();
 				int len = CollectionUtils.size(o);
 				for (int index = 0; index < len; index++) {
-					buffer.append(CollectionUtils.get(o, index));
+					buffer.append(toString(CollectionUtils.get(o, index)));
 					if (index < len - 1) {
 						buffer.append(spliter);
 					}
@@ -178,6 +178,23 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
 				return o.toString();
 			}
 		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static String toReflectString(List dataList){
+		if(CollectionUtils.isEmpty(dataList)){
+			return "";
+		}
+		StringBuffer buffer = new StringBuffer();
+		int len = CollectionUtils.size(dataList);
+		for (int index = 0; index < len; index++) {
+			String strText = toString(dataList.get(index));
+			buffer.append(strText.replaceAll("\r", " ").replaceAll("\n", " "));
+			if (index < len - 1) {
+				buffer.append("\n");
+			}
+		}
+		return buffer.toString();
 	}
 
 	/**

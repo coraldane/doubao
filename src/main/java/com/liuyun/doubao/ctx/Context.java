@@ -1,46 +1,51 @@
 package com.liuyun.doubao.ctx;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.config.DoubaoConfig;
 import com.liuyun.doubao.config.InputConfig;
+import com.liuyun.doubao.extension.ExtensionLoader;
+import com.liuyun.doubao.io.Compression;
+import com.liuyun.doubao.stat.DataStatisticsRepository;
 import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.RingBuffer;
 
 public class Context {
+	private static final ExtensionLoader<Compression> compressionLoader = ExtensionLoader.getExtensionLoader(Compression.class);
+	
+	private DataStatisticsRepository dataStatRepository = null;
 	private DoubaoConfig config = null;
 	
 	private RingBuffer<JsonEvent> filterQueue = null;
 	private RingBuffer<JsonEvent> outputQueue = null;
 	
-	public Context(DoubaoConfig config){
+	public Context(DoubaoConfig config, DataStatisticsRepository dataStatRepository){
 		this.config = config;
+		this.dataStatRepository = dataStatRepository;
 	}
 	
 	public DoubaoConfig getConfig() {
 		return config;
 	}
 
-	public RingBuffer<JsonEvent> getFilterQueue() {
-		return filterQueue;
-	}
-
 	public void setFilterQueue(RingBuffer<JsonEvent> filterQueue) {
 		this.filterQueue = filterQueue;
-	}
-
-	public RingBuffer<JsonEvent> getOutputQueue() {
-		return outputQueue;
 	}
 
 	public void setOutputQueue(RingBuffer<JsonEvent> outputQueue) {
 		this.outputQueue = outputQueue;
 	}
 	
+	public DataStatisticsRepository getDataStatRepository() {
+		return dataStatRepository;
+	}
+
 	private void waitForStoped(RingBuffer<JsonEvent> ringBuffer){
 		while(ringBuffer.remainingCapacity() < ringBuffer.getBufferSize()){
 			try {
@@ -67,10 +72,9 @@ public class Context {
 		}
 	};
 	
-	public static void putData2Queue(RingBuffer<JsonEvent> ringBuffer, JSONObject obj) {
-		if (null != ringBuffer) {
-			ringBuffer.publishEvent(TRANSLATOR, obj);
-		}
+	public void putData2OutQueue(JSONObject json) {
+		this.outputQueue.publishEvent(TRANSLATOR, json);
+		this.dataStatRepository.incrementDataOutputOrigin(1, json.toString().getBytes().length);
 	}
 	
 	public static void addTag2Data(JSONObject data, String tag){
@@ -88,14 +92,42 @@ public class Context {
 		data.put("tags", tagList);
 	}
 	
-	public static void readData2Queue(Context context, JSONObject json){
-		InputConfig inputConfig = context.getConfig().getInput();
-		Map<String, Object> addedFieldMap = inputConfig.getAddedFieldMap();
+	public void readData2Queue(JSONObject json){
+		InputConfig inputConfig = this.getConfig().getInput();
+		Map<String, Object> addedFieldMap = inputConfig.getAdd_field();
 		if(null != addedFieldMap && !addedFieldMap.isEmpty()){
 			for(String key: addedFieldMap.keySet()){
 				json.put(key, addedFieldMap.get(key));
 			}
 		}
-		Context.putData2Queue(context.getFilterQueue(), json);
+		this.filterQueue.publishEvent(TRANSLATOR, json);
+	}
+	
+	public static Compression getCompression(Object configInstance){
+		Object compressTypeObj = getProperty(configInstance, "compression_type");
+		if(null == compressTypeObj || "none".equals(compressTypeObj)){
+			
+		} else {
+			Set<String> extensionNameSet = compressionLoader.getSupportedExtensions();
+			if(extensionNameSet.contains(compressTypeObj)){
+				return compressionLoader.getExtension(compressTypeObj.toString());
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private static Object getProperty(Object instance, String fieldName) {
+		if(null == instance){
+			return null;
+		}
+		try{
+			Class clazz = instance.getClass();
+			Field field = clazz.getField(fieldName);
+			return field.get(instance);
+		}	catch(Exception e){
+			
+		}
+		return null;
 	}
 }

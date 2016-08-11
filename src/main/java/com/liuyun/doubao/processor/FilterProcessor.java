@@ -65,7 +65,7 @@ public class FilterProcessor implements ClosableProcessor {
 			logger.error("filter error", e);
 		}
 		if(false == denied){
-			Context.putData2Queue(this.context.getOutputQueue(), data);
+			this.context.putData2OutQueue(data);
 		}
 	}
 

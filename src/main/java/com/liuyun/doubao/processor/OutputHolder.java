@@ -22,7 +22,7 @@ public class OutputHolder implements InitializingBean {
 	
 	private static final ExtensionLoader<Output> loader = ExtensionLoader.getExtensionLoader(Output.class);
 	
-	private List<OutputProcessor> outputEventHandlers = Lists.newArrayList();
+	private List<OutputProcessor> outputProcessors = Lists.newArrayList();
 	private ExecutorService executor = null;
 	
 	@Override
@@ -38,9 +38,9 @@ public class OutputHolder implements InitializingBean {
 			Output output = loader.createExtensionByIdentified(outputConfig.getClass().getAnnotation(Identified.class));
 			
 			if(null != output){
-				output.init(outputConfig);
-				OutputProcessor thread = new OutputProcessor(output, outputConfig.getBatch_size());
-				this.outputEventHandlers.add(thread);
+				output.init(outputConfig, context);
+				OutputProcessor thread = new OutputProcessor(output, outputConfig);
+				this.outputProcessors.add(thread);
 				executor.submit(thread);
 			}
 		}
@@ -48,15 +48,15 @@ public class OutputHolder implements InitializingBean {
 
 	@Override
 	public void destroy(Context context) {
-		for(OutputProcessor thread: this.outputEventHandlers){
+		for(OutputProcessor thread: this.outputProcessors){
 			thread.getOutput().destroy();
 		}
 	}
 
 	public OutputProcessor[] getOutputEventHandlers() {
-		OutputProcessor[] retArray = new OutputProcessor[this.outputEventHandlers.size()];
-		for(int index=0; index < this.outputEventHandlers.size(); index++){
-			retArray[index] = this.outputEventHandlers.get(index);
+		OutputProcessor[] retArray = new OutputProcessor[this.outputProcessors.size()];
+		for(int index=0; index < this.outputProcessors.size(); index++){
+			retArray[index] = this.outputProcessors.get(index);
 		}
 		return retArray;
 	}

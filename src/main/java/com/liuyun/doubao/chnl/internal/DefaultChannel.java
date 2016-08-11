@@ -2,7 +2,9 @@ package com.liuyun.doubao.chnl.internal;
 
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
 import com.liuyun.doubao.chnl.Channel;
@@ -15,6 +17,7 @@ import com.liuyun.doubao.processor.ClosableProcessor;
 import com.liuyun.doubao.processor.FilterProcessor;
 import com.liuyun.doubao.processor.InputProcessor;
 import com.liuyun.doubao.processor.OutputHolder;
+import com.liuyun.doubao.stat.DataStatisticsRepository;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -22,19 +25,26 @@ import com.lmax.disruptor.dsl.Disruptor;
 public class DefaultChannel implements Channel {
 	// Specify the size of the ring buffer, must be power of 2.
 	private static final int DEFAULT_RING_BUFFER_SIZE = 1024;
+	
+	private static final int DEFAULT_DATA_STAT_INTERVAL = 60;
 
 	private Context context = null;
 
 	private InputProcessor inputProcessor = null;
 	private List<InitializingBean> processorList = Lists.newArrayList();
+	
+	private DataStatisticsRepository dataStatRepository = new DataStatisticsRepository();
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
 	@Override
 	public void setConfig(DoubaoConfig config) {
-		this.context = new Context(config);
+		this.context = new Context(config, dataStatRepository);
 	}
 
 	@Override
 	public void start() {
+		this.executorService.scheduleWithFixedDelay(this.dataStatRepository, 10, DEFAULT_DATA_STAT_INTERVAL, TimeUnit.SECONDS);
+		
 		ClosableProcessor filterProcessor = new FilterProcessor();
 		this.addHandler(filterProcessor, this.context);
 		this.context.setFilterQueue(this.makeRingBuffer(new EventHandler[]{filterProcessor}));
@@ -52,6 +62,7 @@ public class DefaultChannel implements Channel {
 	public void stop() {
 		this.inputProcessor.stop(false);
 		this.context.stop();
+		this.executorService.shutdown();
 		
 		this.inputProcessor.destroy(this.context);
 		for(InitializingBean processor: this.processorList){

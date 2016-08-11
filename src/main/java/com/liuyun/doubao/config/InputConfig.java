@@ -7,9 +7,9 @@ import com.liuyun.doubao.extension.SPI;
 @SPI
 public interface InputConfig {
 
-	void setAddedFieldMap(Map<String, Object> fieldsMap);
+	void setAdd_field(Map<String, Object> fieldMap);
 	
-	Map<String, Object> getAddedFieldMap();
+	Map<String, Object> getAdd_field();
 	
 	
 }

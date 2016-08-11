@@ -7,24 +7,35 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.liuyun.doubao.config.OutputConfig;
+import com.liuyun.doubao.ctx.Context;
 import com.liuyun.doubao.ctx.JsonEvent;
+import com.liuyun.doubao.io.Compression;
 import com.liuyun.doubao.io.Output;
+import com.liuyun.doubao.utils.StringUtils;
 import com.liuyun.doubao.utils.SysUtils;
 import com.lmax.disruptor.EventHandler;
 
 public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private Output output = null;
-	private int batchSize = 0;
+	private static final long FLUSH_DATA_INTERVAL = 3000;
 	
+	private Output output = null;
+	private OutputConfig outputConfig = null;
+	
+	private Compression compression = null;
+	private int batchSize = 100;
 	private long lastWriteTime = System.currentTimeMillis();
 	
 	private List<JSONObject> dataBuffer = Lists.newArrayList();
 	
-	public OutputProcessor(Output output, int batchSize){
+	public OutputProcessor(Output output, OutputConfig outputConfig){
 		this.output = output;
-		this.batchSize = batchSize;
+		this.outputConfig = outputConfig;
+		this.batchSize = outputConfig.getBatch_size();
+		
+		this.compression = Context.getCompression(this.outputConfig);
 	}
 	
 	public Output getOutput() {
@@ -51,14 +62,30 @@ public class OutputProcessor implements EventHandler<JsonEvent>, Runnable {
 	@Override
 	public void run(){
 		while(true){
-			if(this.dataBuffer.size() >= this.batchSize || lastWriteTime +1000 < System.currentTimeMillis()){
-				this.output.write(this.dataBuffer);
+			if(this.dataBuffer.size() >= this.batchSize || lastWriteTime + FLUSH_DATA_INTERVAL < System.currentTimeMillis()){
+				this.flushData(this.dataBuffer);
 				this.dataBuffer.clear();
 				
 				lastWriteTime = System.currentTimeMillis();
 			} else {
 				SysUtils.sleep(100);
 			}
+		}
+	}
+	
+	private void flushData(List<JSONObject> dataList){
+		if(null == this.compression){
+			this.output.write(dataList);
+			return;
+		}
+		
+		String source = null;
+		try {
+			source = StringUtils.toReflectString(dataList);
+			String compressed = this.compression.compress(source);
+			this.output.writeCompressedData(compressed);
+		} catch(Exception e){
+			logger.error("compress data error, source: {}", source, e);
 		}
 	}
 	
