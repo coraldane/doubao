@@ -49,7 +49,7 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 		}
 	}
 	
-	public void handleEvent(Kind<?> kind, Path child) {
+	public void handleEvent(Kind<?> kind, Path child) throws IOException {
 		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}

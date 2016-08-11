@@ -182,7 +182,11 @@ public class FilePathWatcher implements Runnable {
 				// register it and its sub-directories
 				this.registerSubDirectories(kind, child);
 				
-				this.pathChangedProcessor.handleEvent(event.kind(), child);
+				try {
+					this.pathChangedProcessor.handleEvent(event.kind(), child);
+				} catch (IOException e) {
+					logger.error("handle event error", e);
+				}
 			}
 
 			// reset key and remove from set if directory no longer accessible
