@@ -12,6 +12,13 @@ mkdir -p data logs
 pidfile=data/$conf_file.pid
 logfile=logs/$conf_file.log
 
+JAVA_OPTS="-server"
+JAVA_OPTS="${JAVA_OPTS} -Xms128m -Xmx1024m"
+JAVA_OPTS="${JAVA_OPTS} -Xmn128m"
+JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"
+JAVA_OPTS="${JAVA_OPTS} -Xloggc:${WORKSPACE}/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+JAVA_OPTS="${JAVA_OPTS} -Dlog4j.configuration=file://${WORKSPACE}/conf/log4j.xml"
+
 function check_pid() {
     if [ -f $pidfile ];then
         pid=`cat $pidfile`
@@ -24,6 +31,7 @@ function check_pid() {
 }
 
 function start() {
+	ulimit -c unlimited
     check_pid
     running=$?
     if [ $running -gt 0 ];then
@@ -31,7 +39,7 @@ function start() {
         cat $pidfile
         return 1
     fi
-    java -Dlog4j.configuration=file://${WORKSPACE}/conf/log4j.xml -jar doubao-1.0.0-standalone.jar conf/$conf_file.json &> $logfile &
+    java ${JAVA_OPTS} -jar doubao-1.0.0-standalone.jar conf/$conf_file.json &> $logfile &
     echo $! > $pidfile
     echo "$app started..."
 }
@@ -64,12 +72,12 @@ function tailf() {
 
 function pack() {
     cd target
-    mkdir -p $app-releases
-    cp -r $app-$version-standalone.jar ../conf ../control $app-releases/
-    file_list="$app-releases"
+    mkdir -p $app
+    cp -r $app-$version-standalone.jar ../conf ../control $app/
+    file_list="$app"
     echo "...tar $app-$version.tar.gz <= $file_list"
     tar zcvf $app-$version.tar.gz $file_list
-    rm -rf $app-releases
+    rm -rf $app
 }
 
 function help() {

@@ -83,15 +83,15 @@ public class FileReaderFactory implements DataReaderFactory {
 				String key = this.readyQueue.take();
 				
 				final AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
-				ThreadUtils.newThread(dataReader, new Function<AbstractStopableDataReader, Void>(){
+				ThreadUtils.newThread(dataReader, new Function<AbstractStopableDataReader, Boolean>(){
 					@Override
-					public Void apply(AbstractStopableDataReader input) {
+					public Boolean apply(AbstractStopableDataReader input) {
 						try {
 							dataReader.readData();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						return null;
+						return Boolean.FALSE;
 					}
 					
 				});

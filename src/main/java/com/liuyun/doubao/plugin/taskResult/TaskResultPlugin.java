@@ -56,7 +56,7 @@ public class TaskResultPlugin extends DefaultPlugin {
 				data.put("task_info", taskInfo);
 				return data;
 			} catch(Exception e){
-				logger.error("ParseJsonError===>>>" + taskMessage, e);
+				logger.error("ParseJsonError===>>>" + taskMessage + "         " + e.getMessage());
 			}
 		}
 		return null;
