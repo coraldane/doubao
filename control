@@ -13,8 +13,8 @@ pidfile=data/$conf_file.pid
 logfile=logs/$conf_file.log
 
 JAVA_OPTS="-server"
-JAVA_OPTS="${JAVA_OPTS} -Xms128m -Xmx1024m"
-JAVA_OPTS="${JAVA_OPTS} -Xmn128m"
+#JAVA_OPTS="${JAVA_OPTS} -Xms128m -Xmx1024m"
+#JAVA_OPTS="${JAVA_OPTS} -Xmn128m"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"
 JAVA_OPTS="${JAVA_OPTS} -Xloggc:${WORKSPACE}/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
 JAVA_OPTS="${JAVA_OPTS} -Dlog4j.configuration=file://${WORKSPACE}/conf/log4j.xml"

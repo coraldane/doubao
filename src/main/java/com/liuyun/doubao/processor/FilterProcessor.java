@@ -46,6 +46,9 @@ public class FilterProcessor implements ClosableProcessor {
 	@Override
 	public void onEvent(JsonEvent event, long sequence, boolean endOfBatch) {
 		JSONObject data = event.get();
+		if(null == data){
+			return;
+		}
 		boolean denied = false;
 		try {
 			for(List<Filter> filterList: this.filters){
