@@ -83,6 +83,9 @@ public class FileReaderFactory implements DataReaderFactory {
 				String key = this.readyQueue.take();
 				
 				final AbstractStopableDataReader dataReader = this.fileReaderMap.get(key);
+				if(null == dataReader){
+					continue;
+				}
 				ThreadUtils.newThread(dataReader, new Function<AbstractStopableDataReader, Boolean>(){
 					@Override
 					public Boolean apply(AbstractStopableDataReader input) {

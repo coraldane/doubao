@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -25,6 +27,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 	
 	private static final int MAX_READ_LINES_PER_TIME = 100;
 	
+	private Lock fileLock = new ReentrantLock();
 	protected volatile boolean waitForReading = true;
 	private long lastOffset = 0L;
 	
@@ -65,6 +68,9 @@ public class SingleFileReader extends AbstractStopableDataReader {
 	@Override
 	public void readData() throws IOException {
 		this.setReadyForStop(false);
+		if(null == this.fileHandler){
+			return;
+		}
 		
 		this.lastOffset = this.sincedbHandler.getOffset(this.fileKey);
 		long newOffset = this.fileHandler.size();
@@ -155,11 +161,13 @@ public class SingleFileReader extends AbstractStopableDataReader {
 	}
 	
 	public void reset(String newFileKey, Path path) throws IOException {
+		this.fileLock.lock();
 		this.fileKey = newFileKey;
 		this.lastOffset = 0;
 		this.destroy();
 		
 		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
+		this.fileLock.unlock();
 	}
 	
 	@Override
