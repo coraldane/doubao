@@ -70,6 +70,8 @@ public class FileReaderFactory implements DataReaderFactory {
 		SingleFileReader fileReader = (SingleFileReader)reader;
 		this.fileReaderMap.put(newKey, fileReader);
 		try {
+			//重置读取流之前，先将未读取的数据读完
+			fileReader.readData();
 			fileReader.reset(newKey, path);
 		} catch (IOException e) {
 			e.printStackTrace();

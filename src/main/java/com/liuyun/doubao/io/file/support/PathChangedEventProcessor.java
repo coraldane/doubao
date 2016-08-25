@@ -50,6 +50,7 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) throws IOException {
+		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}

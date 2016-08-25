@@ -127,7 +127,7 @@ public class Context {
 			Method method = clazz.getMethod(methodName);
 			return method.invoke(instance);
 		}	catch(Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		return null;
 	}

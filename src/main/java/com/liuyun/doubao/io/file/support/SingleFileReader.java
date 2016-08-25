@@ -166,7 +166,7 @@ public class SingleFileReader extends AbstractStopableDataReader {
 		this.lastOffset = 0;
 		this.destroy();
 		
-		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ);
+		this.fileHandler = Files.newByteChannel(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
 		this.fileLock.unlock();
 	}
 	
