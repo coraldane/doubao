@@ -46,11 +46,11 @@ public class PathChangedEventProcessor implements Closable, Stopable {
 			SingleFileReader fileReader = new SingleFileReader(context, path, sincedbHandler);
 			this.fileKeyMap.put(path.toString(), fileKey);
 			this.dataReaderFactory.addReader(fileKey, fileReader);
+			this.dataReaderFactory.notifyForRead(fileKey);
 		}
 	}
 	
 	public void handleEvent(Kind<?> kind, Path child) throws IOException {
-		logger.debug("kind:{}, path: {}", kind.name(), child.toString());
 		if(!this.fileKeyMap.containsKey(child.toString())){
 			return;
 		}

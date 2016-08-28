@@ -59,7 +59,7 @@ public class TaskResultPlugin extends DefaultPlugin {
 				logger.error("ParseJsonError===>>>" + taskMessage + "         " + e.getMessage());
 			}
 		}
-		return null;
+		return data;
 	}
 	
 	private boolean dealWithPartResult(String loggerIndex, JSONObject data){
