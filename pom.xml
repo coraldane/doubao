@@ -154,7 +154,7 @@
 	<repositories>
 		<repository>
 			<id>thirdparty</id>
-			<url>http://udai.com:8099/repository/maven-releases/</url>
+			<url>http://maven.tarzip.com/repository/maven-releases/</url>
 		</repository>
 	</repositories>
 
@@ -162,7 +162,7 @@
 		<repository>
 			<id>thirdparty</id>
 			<name>LiuTian private Repository</name>
-			<url>http://udai.com:8099/repository/maven-releases/</url>
+			<url>http://maven.tarzip.com/repository/maven-releases/</url>
 		</repository>
 	</distributionManagement>
 </project>
