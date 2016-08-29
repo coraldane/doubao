@@ -17,10 +17,10 @@ JAVA_OPTS="-server"
 JAVA_VERSION=`java -version 2>&1 |awk -F' ' '/version/{print $3}'|cut -c 2-4`
 ####JDK 7
 if [ $JAVA_VERSION == '1.7' ];then
-    JAVA_OPTS="${JAVA_OPTS} -XX:PermSize=64M -XX:MaxPermSize=256M"
+    JAVA_OPTS="${JAVA_OPTS} -XX:PermSize=64M -XX:MaxPermSize=128M"
 fi
 
-JAVA_OPTS="${JAVA_OPTS} -Xmx512m -Xmn128m"
+JAVA_OPTS="${JAVA_OPTS} -Xmx256m -Xmn128m"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"
 JAVA_OPTS="${JAVA_OPTS} -Xloggc:${WORKSPACE}/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
 JAVA_OPTS="${JAVA_OPTS} -Dlog4j.configuration=file://${WORKSPACE}/conf/log4j.xml"
