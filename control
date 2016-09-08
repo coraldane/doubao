@@ -46,7 +46,7 @@ function start() {
     fi
     java ${JAVA_OPTS} -jar doubao-1.0.0-standalone.jar conf/$conf_file.json &> $logfile &
     echo $! > $pidfile
-    echo –1000 > /proc/$!/oom_score_adj
+    echo -1000 > /proc/`cat $pidfile`/oom_score_adj
     echo "$app started..."
 }
 
