@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.liuyun.doubao.input.AbstractStopableDataReader;
@@ -13,6 +16,7 @@ import com.liuyun.doubao.input.DataReaderFactory;
 import com.liuyun.doubao.utils.ThreadUtils;
 
 public class FileReaderFactory implements DataReaderFactory {
+	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	protected volatile boolean running = true;
 
@@ -74,7 +78,7 @@ public class FileReaderFactory implements DataReaderFactory {
 			fileReader.readData();
 			fileReader.reset(newKey, path);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("reset reader error", e);
 		}
 	}
 
@@ -94,14 +98,14 @@ public class FileReaderFactory implements DataReaderFactory {
 						try {
 							dataReader.readData();
 						} catch (IOException e) {
-							e.printStackTrace();
+							logger.error("read data error", e);
 						}
 						return Boolean.FALSE;
 					}
 					
 				});
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("read data thread error", e);
 			}
 		}
 	}
